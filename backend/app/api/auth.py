@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from app.security.rate_limit import login_limiter
-
 from app.auth.service import (
     audit,
     authenticate,
@@ -10,6 +8,7 @@ from app.auth.service import (
     delete_session,
     get_session,
 )
+from app.security.rate_limit import login_limiter
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
