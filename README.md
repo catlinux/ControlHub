@@ -51,3 +51,12 @@ La documentación de desarrollo y operación se encuentra en docs/DEVELOPMENT.md
 - docs/PROJECT-STATE.md
 - docs/DECISIONS.md
 - CHANGELOG.md
+
+
+## Privacidad e indexación
+
+ControlHub es un centro de control privado y no un sitio público. La aplicación requiere autenticación para acceder al portal y a los recursos y aplica noindex mediante meta robots y cabecera X-Robots-Tag. También publica un robots.txt que bloquea el rastreo y no mantiene sitemap.
+
+La administración está separada visualmente del portal y sólo está disponible para usuarios con rol administrador. Los usuarios normales utilizan ControlHub como portal de acceso a los recursos autorizados.
+
+La no indexación no sustituye a la autenticación, autorización ni al resto de controles de seguridad.
