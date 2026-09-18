@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Form, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.auth.service import (
     audit,
@@ -36,8 +36,7 @@ def login(
 
     session_id, csrf_token = create_session(user["id"])
     audit(user["id"], "auth.login")
-    response = {"authenticated": True, "username": user["username"]}
-    response = JSONResponse(response)
+    response = JSONResponse({"authenticated": True, "username": user["username"]})
     response.set_cookie(
         "controlhub_session",
         session_id,
