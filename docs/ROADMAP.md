@@ -6,8 +6,9 @@ Este roadmap es orientativo. Las funcionalidades futuras no se consideran obliga
 
 ### Implementado en la rama actual
 
-- Dashboard.
+- Portal privado como pantalla principal.
 - Recursos y tarjetas.
+- Recursos agrupados visualmente por categorías.
 - Categorías y tags.
 - Búsqueda y filtros.
 - Favoritos.
@@ -16,14 +17,16 @@ Este roadmap es orientativo. Las funcionalidades futuras no se consideran obliga
 - Autenticación con sesiones server-side.
 - Protección CSRF.
 - Rate limiting básico para login y acciones administrativas sensibles.
-- Panel de administración integrado.
+- Administración separada del portal mediante modal.
 - Gestión básica de usuarios, roles y contraseñas.
 - Gestión de secretos cifrados separada de Resource.
 - Auditoría consultable.
+- Acción administrativa de reinicio limitada.
 - Persistencia SQLModel con Alembic.
 - Interfaz responsive/mobile-first.
 - API REST bajo /api/v1.
 - Despliegue preparado con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
+- Protección contra indexación mediante meta robots, X-Robots-Tag y robots.txt.
 
 ### Pendiente de completar la V1
 
@@ -65,19 +68,3 @@ Posibles funcionalidades:
 - Acciones remotas controladas.
 
 Las fases podrán modificarse según las necesidades reales.
-
-
-## Experiencia de uso de la V1
-
-- Portal privado como pantalla principal.
-- Recursos agrupados visualmente por categoría.
-- Favoritos, búsqueda y filtros.
-- Administración separada del portal mediante modal.
-- Administración organizada en usuarios, secretos, auditoría y sistema.
-- Gestión de recursos y categorías restringida al rol administrador.
-
-## Privacidad
-
-- Aplicación no indexable por buscadores.
-- Meta robots y cabecera X-Robots-Tag.
-- robots.txt sin sitemap.
