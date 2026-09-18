@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.security.rate_limit import login_limiter
-from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.auth.service import (
     audit,
