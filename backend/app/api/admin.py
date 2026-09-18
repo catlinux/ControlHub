@@ -1,6 +1,7 @@
 import subprocess
 
 from fastapi import APIRouter, HTTPException, Request
+from app.security.rate_limit import admin_limiter
 
 from app.auth.service import audit, get_session
 
@@ -24,6 +25,9 @@ def require_admin(request: Request):
 @router.post("/restart")
 def restart(request: Request):
     session = require_admin(request)
+    client_key = request.client.host if request.client else "unknown"
+    if not admin_limiter.allow(client_key):
+        raise HTTPException(status_code=429, detail="Demasiadas solicitudes administrativas.")
     audit(session["user_id"], "controlhub.restart.requested")
     subprocess.Popen(
         ["/usr/bin/sudo", "-n", "/bin/systemctl", "restart", "controlhub.service"],
