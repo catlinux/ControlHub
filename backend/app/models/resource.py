@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from sqlmodel import Field, SQLModel
 
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True)
     password_hash: str
     role: str = "admin"
@@ -28,8 +26,8 @@ class AuthSession(SQLModel, table=True):
 class AuditLog(SQLModel, table=True):
     __tablename__ = "audit_log"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int | None = Field(default=None, foreign_key="users.id")
     action: str = Field(index=True)
     created_at: str
 
@@ -37,7 +35,7 @@ class AuditLog(SQLModel, table=True):
 class Category(SQLModel, table=True):
     __tablename__ = "categories"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     description: str = ""
     created_at: str
@@ -46,7 +44,7 @@ class Category(SQLModel, table=True):
 class Tag(SQLModel, table=True):
     __tablename__ = "tags"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     created_at: str
 
@@ -61,14 +59,14 @@ class ResourceTag(SQLModel, table=True):
 class Resource(SQLModel, table=True):
     __tablename__ = "resources"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     description: str = ""
-    category_id: Optional[int] = Field(default=None, foreign_key="categories.id", index=True)
+    category_id: int | None = Field(default=None, foreign_key="categories.id", index=True)
     resource_type: str = Field(default="web", index=True)
     url: str = ""
     host: str = ""
-    port: Optional[int] = None
+    port: int | None = None
     username: str = ""
     icon: str = ""
     status: str = "unknown"
