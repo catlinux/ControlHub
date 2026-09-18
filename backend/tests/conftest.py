@@ -13,7 +13,7 @@ def client(monkeypatch, tmp_path) -> TestClient:
     monkeypatch.setenv("CONTROLHUB_ADMIN_PASSWORD", "test-password")
     monkeypatch.setenv("CONTROLHUB_SECRET_KEY", "kjyRTXTmx0H69SJBlfDnYmlaIzx10jdIPqty6i_e2ZE=")
 
-    import app.db as db
+    from app import db
     from app.main import app
 
     test_engine = create_engine(
