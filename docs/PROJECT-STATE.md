@@ -4,7 +4,7 @@
 
 ## Estado general
 
-ControlHub está en fase de diseño técnico inicial.
+ControlHub está en fase de arquitectura técnica consolidada, antes de la implementación funcional.
 
 ## Repositorio
 
@@ -25,6 +25,22 @@ ControlHub está en fase de diseño técnico inicial.
 - El proyecto utilizará Git desde el principio.
 - Se seguirá la metodología INSPECT → PLAN → EXECUTE → VERIFY → DOCUMENT → BACKUP.
 
+## Decisiones técnicas consolidadas
+
+- Monolito modular y monorepo.
+- Backend Python + FastAPI.
+- Frontend Vue 3 + TypeScript + Tailwind CSS.
+- SQLite + SQLModel + Alembic.
+- REST /api/v1.
+- Sesiones server-side + Argon2id.
+- Secretos separados y cifrados.
+- User → Role → Permission.
+- Panel de administración integrado en V1.
+- Auditoría y logs separados.
+- Apache + Uvicorn/systemd + FastAPI en producción.
+- Sin Docker en V1.
+- pytest, Vitest, Playwright y GitHub Actions.
+
 ## Pendiente de decidir
 
 - Lenguaje y framework del backend.
@@ -39,4 +55,4 @@ ControlHub está en fase de diseño técnico inicial.
 
 ## Próximo paso
 
-Definir y documentar el stack tecnológico y la arquitectura técnica detallada de la V1 antes de comenzar la implementación.
+Crear la estructura inicial del monorepo y el esqueleto mínimo de frontend, backend, tests, scripts y configuración.
