@@ -82,3 +82,25 @@ def test_category_creation_requires_name(client, monkeypatch) -> None:
 
     response = client.post("/api/v1/categories", params={"name": "   "})
     assert response.status_code == 400
+
+
+def test_resource_management_requires_admin(client, monkeypatch) -> None:
+    import app.api.resources as resources_api
+
+    session = {
+        "user_id": 2,
+        "csrf_token": "test-csrf",
+        "role": "user",
+        "username": "regular-user",
+    }
+    monkeypatch.setattr(resources_api, "require_user", lambda request: session)
+
+    payload = {
+        "name": "No autorizado",
+        "resource_type": "web",
+    }
+    response = client.post("/api/v1/resources", json=payload)
+    assert response.status_code == 403
+
+    response = client.post("/api/v1/categories", params={"name": "No autorizada"})
+    assert response.status_code == 403
