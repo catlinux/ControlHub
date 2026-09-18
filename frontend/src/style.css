@@ -66,3 +66,57 @@ input, select, textarea { width: 100%; border: 1px solid #cfd7df; border-radius:
 .category-create { display: flex; gap: 0.5rem; align-items: center; }
 .category-create input { min-width: 10rem; }
 @media (max-width: 700px) { .category-create { width: 100%; } .category-create input { flex: 1; min-width: 0; } }
+
+
+.admin-panel {
+  margin-top: 2rem;
+  border-top: 1px solid #ddd;
+  padding-top: 1.5rem;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.admin-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.admin-card h3 {
+  margin-top: 0;
+}
+
+.admin-list,
+.audit-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.admin-list li,
+.audit-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border-top: 1px solid #eee;
+  padding: .7rem 0;
+}
+
+.hint {
+  font-size: .9rem;
+  opacity: .75;
+}
+
+@media (max-width: 640px) {
+  .admin-list li,
+  .audit-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
