@@ -4,15 +4,15 @@
 
 ## Estado general
 
-ControlHub está pasando de la base de autenticación al dashboard funcional de la V1. El despliegue existente en Debian continúa operativo con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
+ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-restart`. El despliegue existente en Debian está operativo con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
 
 ## Repositorio
 
 - Repositorio: catlinux/ControlHub.
 - Rama de trabajo: feature/admin-restart.
 - PR #1: abierto y en estado draft; no debe fusionarse todavía.
-- La última versión previamente verificada por CI fue el commit 31e05a36a3e6963e2b11c464711c53cd7cc3f264.
-- La rama actual ya contiene el primer bloque de recursos y el dashboard asociado; el nuevo CI está en ejecución y debe quedar verde antes del despliegue.
+- La rama contiene autenticación, dashboard, recursos, administración y el bloque de seguridad/migraciones de la V1.
+- Los cambios de esta etapa deben pasar CI antes de desplegarse.
 
 ## Producción Debian
 
@@ -25,40 +25,41 @@ ControlHub está pasando de la base de autenticación al dashboard funcional de 
 - Servicio: controlhub.service, habilitado y activo.
 - Sudoers permite exclusivamente /bin/systemctl restart controlhub.service.
 - Verificado en servidor: health local y health HTTPS devuelven {"status":"ok"}.
-- El servidor todavía ejecuta la versión anterior; no se debe desplegar el nuevo dashboard hasta completar CI y las pruebas locales.
+- El servidor está operativo con la versión ya desplegada antes del bloque más reciente de seguridad y administración; el nuevo bloque requiere CI y despliegue controlado.
 
 ## Funcionalidad implementada en la rama
 
-- Autenticación con sesiones server-side.
-- Argon2id para contraseñas.
+- Autenticación con sesiones server-side y Argon2id.
 - Protección CSRF.
+- Rate limiting básico para login y acciones administrativas.
 - Auditoría básica.
 - Reinicio administrativo seguro y limitado.
-- Persistencia común mediante SQLModel.
-- Entidades User, sesión, auditoría, Category, Tag y Resource.
-- CRUD inicial de recursos.
+- Persistencia mediante SQLModel.
+- Alembic como mecanismo único de evolución de esquema, con compatibilidad de arranque para la base existente.
+- Entidades User, sesión, auditoría, Category, Tag, Resource y Secret.
+- CRUD de recursos.
 - Búsqueda por nombre, descripción, host y URL.
-- Filtro por categoría y favoritos.
-- Tags asociados a recursos.
+- Filtros por categoría, favoritos y tags.
 - URLs y datos SSH.
-- Copia de comandos SSH desde el dashboard.
-- Interfaz responsive inicial para tarjetas de recursos.
+- Copia de comandos SSH.
+- Interfaz responsive con tarjetas.
+- Administración básica de usuarios, roles y contraseñas.
+- Almacén de secretos cifrados separado del modelo Resource.
+- Consulta de auditoría desde administración.
 
 ## Deuda técnica y seguridad
 
-- Alembic todavía debe consolidarse como mecanismo único de migraciones.
-- Rate limiting de login y otros endpoints sensibles sigue pendiente.
-- El sistema de secretos cifrados separado del modelo Resource sigue pendiente.
-- La gestión avanzada de usuarios, roles y permisos sigue pendiente.
+- CONTROLHUB_SECRET_KEY debe configurarse en producción antes de utilizar secretos.
 - Los estados de recursos todavía son informativos; no hay monitorización activa.
-- Deben añadirse pruebas de integración y Playwright progresivamente.
-- Debe revisarse la política de frontend/package-lock.json antes de adoptar npm ci.
+- Deben añadirse pruebas de navegador y una verificación E2E del despliegue.
+- Debe completarse la revisión final de accesibilidad y contratos OpenAPI.
+- La política de frontend/package-lock.json continúa siendo no versionarlo por ahora.
 
 ## Siguiente bloque de trabajo
 
-1. Dejar CI verde para el bloque de recursos.
-2. Actualizar y verificar el servidor.
-3. Consolidar Alembic.
-4. Completar gestión de categorías y tags desde la interfaz.
-5. Añadir rate limiting y pruebas de integración.
-6. Continuar con estados básicos, administración y secretos según el orden de la V1.
+1. Ejecutar CI sobre el bloque actual y corregir cualquier fallo.
+2. Desplegar controladamente la rama en Debian.
+3. Configurar y verificar CONTROLHUB_SECRET_KEY fuera del repositorio.
+4. Ejecutar pruebas de integración y navegador.
+5. Completar estados técnicos básicos y revisión final de la V1.
+6. Actualizar documentación y dejar el PR listo para revisión, sin fusionarlo automáticamente.
