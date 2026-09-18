@@ -6,9 +6,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from app.db import resolved_database_url
-
 import app.models  # noqa: F401
+from app.db import resolved_database_url
 
 config = context.config
 config.set_main_option("sqlalchemy.url", resolved_database_url())
