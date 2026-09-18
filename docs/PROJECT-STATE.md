@@ -4,49 +4,28 @@
 
 ## Estado general
 
-ControlHub está en fase de arquitectura técnica consolidada, antes de la implementación funcional.
+ControlHub ha pasado del esqueleto técnico a una primera base funcional ejecutable.
 
-## Repositorio
+## Estado actual
 
-- Repositorio GitHub creado.
-- Visibilidad: pública.
-- Organización/propietario: Catlinux.
-- Se ha creado el esqueleto inicial de frontend, backend, tests, scripts y CI.
-- La implementación funcional de V1 todavía no ha comenzado.
+- Backend FastAPI ejecutable mediante Uvicorn/systemd.
+- Frontend Vue 3 + TypeScript.
+- Autenticación inicial con sesiones server-side almacenadas en SQLite.
+- Rol administrativo inicial.
+- Panel web mínimo.
+- Acción administrativa `Reiniciar ControlHub`.
+- Protección CSRF para la acción administrativa.
+- Auditoría mínima de solicitudes de reinicio.
+- El servicio de producción utiliza el puerto interno configurable 8008.
 
-## Decisiones confirmadas
+## Integración pendiente en Debian
 
-- El proyecto se denomina ControlHub.
-- La documentación y las descripciones del proyecto se redactarán en castellano.
-- El software comenzará en castellano.
-- La arquitectura se preparará para internacionalización futura.
-- La V1 priorizará simplicidad, seguridad, fiabilidad y mantenibilidad.
-- Se evitará la complejidad innecesaria.
-- Las credenciales y secretos estarán separados del modelo normal de recursos.
-- El proyecto utilizará Git desde el principio.
-- Se seguirá la metodología INSPECT → PLAN → EXECUTE → VERIFY → DOCUMENT → BACKUP.
+El entorno existente puede conservar `CONTROLHUB_HOST=127.0.0.1` y `CONTROLHUB_PORT=8008`.
 
-## Decisiones técnicas consolidadas
+Hay que añadir al entorno de producción las credenciales iniciales del administrador y, para habilitar el botón, una regla sudoers exacta que permita únicamente reiniciar `controlhub.service`.
 
-- Monolito modular y monorepo.
-- Backend Python + FastAPI.
-- Frontend Vue 3 + TypeScript + Tailwind CSS.
-- SQLite + SQLModel + Alembic.
-- REST /api/v1.
-- Sesiones server-side + Argon2id.
-- Secretos separados y cifrados.
-- User → Role → Permission.
-- Panel de administración integrado en V1.
-- Auditoría y logs separados.
-- Apache + Uvicorn/systemd + FastAPI en producción.
-- Sin Docker en V1.
-- pytest, Vitest, Playwright y GitHub Actions.
-
-## Pendiente de decidir
-
-- Diseño detallado del modelo de datos, antes de crear la migración inicial.
-- Detalle final de la UI y navegación, validado durante el prototipo.
+El frontend debe compilarse antes de poner esta versión detrás de Apache.
 
 ## Próximo paso
 
-Implementar la base de aplicación: configuración, persistencia SQLModel/Alembic y primer modelo de datos, manteniendo el alcance estrictamente dentro de la V1.
+Integrar esta versión en Debian, construir el frontend, crear/ajustar el usuario administrador y verificar login → panel → reinicio → recuperación. Después continuar con el modelo funcional de recursos y la migración de base de datos prevista para V1.

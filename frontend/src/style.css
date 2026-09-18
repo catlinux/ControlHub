@@ -1,35 +1,14 @@
 @import "tailwindcss";
 
-:root {
-  font-family: Inter, system-ui, sans-serif;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  background: #f4f4f5;
-  color: #18181b;
-}
-
-.app {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-}
-
-.panel {
-  width: min(100%, 42rem);
-  padding: 2rem;
-  border-radius: 1rem;
-  background: white;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 8%);
-}
-
-.eyebrow {
-  margin: 0 0 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
+:root { font-family: Inter, system-ui, sans-serif; color: #18181b; background: #f4f4f5; }
+body { margin: 0; min-width: 320px; }
+.app { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+.panel { width: min(100%, 42rem); padding: 2rem; border-radius: 1rem; background: white; box-shadow: 0 10px 30px rgb(0 0 0 / 8%); }
+.eyebrow { margin: 0 0 .5rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.form { display: grid; gap: 1rem; margin-top: 1.5rem; }
+label { display: grid; gap: .4rem; font-weight: 600; }
+input { padding: .75rem; border: 1px solid #d4d4d8; border-radius: .6rem; font: inherit; }
+button { padding: .75rem 1rem; border: 0; border-radius: .6rem; background: #18181b; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+button.secondary { background: #e4e4e7; color: #18181b; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.message, .error { margin-top: 1rem; font-weight: 600; }
