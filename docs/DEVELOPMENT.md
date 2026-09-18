@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-ControlHub dispone de autenticación, sesiones server-side, panel responsive y reinicio administrativo. La siguiente etapa implementará el CRUD de recursos de la V1.
+ControlHub dispone de autenticación, sesiones server-side, panel responsive, recursos, categorías, tags, administración básica, auditoría y almacenamiento cifrado de secretos separado del modelo Resource.
 
 ## Producción en Debian
 
@@ -25,8 +25,20 @@ CONTROLHUB_PORT=8008
 DATABASE_URL=sqlite:///data/controlhub.db
 CONTROLHUB_ADMIN_USERNAME=<usuario>
 CONTROLHUB_ADMIN_PASSWORD=<contraseña-inicial>
+CONTROLHUB_SECRET_KEY=<clave-Fernet-generada-fuera-del-repositorio>
 
-Los secretos reales nunca se introducen en Git.
+La clave Fernet debe mantenerse fuera de Git y fuera de la base de datos. No debe compartirse en incidencias, logs ni documentación pública.
+
+### Base de datos
+
+Alembic es el mecanismo único de evolución del esquema.
+
+La aplicación ejecuta las migraciones al iniciar. Si encuentra una base existente sin tabla alembic_version, la marca como compatible con la migración inicial y aplica las migraciones posteriores.
+
+Para nuevas instalaciones también puede ejecutarse explícitamente:
+
+cd backend
+.venv/bin/alembic upgrade head
 
 ### Servicio
 
@@ -58,6 +70,7 @@ Backend:
 cd backend
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
+.venv/bin/ruff check .
 .venv/bin/pytest -q
 
 Frontend:
@@ -68,16 +81,25 @@ npm run lint
 npm run test
 npm run build
 
-El lockfile generado localmente no se versiona actualmente; la política de lockfiles deberá decidirse explícitamente.
+El lockfile generado localmente no se versiona actualmente.
+
+## Secretos
+
+Los valores secretos se cifran con Fernet. Resource no almacena secretos.
+
+La API de secretos sólo devuelve metadatos; nunca devuelve el valor ni el ciphertext. Las operaciones de escritura requieren sesión administrativa y CSRF.
 
 ## Despliegue
 
 1. Actualizar el código con Git.
 2. Instalar dependencias si han cambiado.
-3. Ejecutar tests.
-4. Construir frontend.
-5. Ejecutar migraciones cuando corresponda.
-6. Reiniciar controlhub.service.
-7. Verificar health y flujos críticos.
+3. Ejecutar Ruff y pytest.
+4. Ejecutar lint, tests y build del frontend.
+5. Verificar migraciones Alembic.
+6. Configurar secretos fuera del repositorio.
+7. Reiniciar controlhub.service.
+8. Verificar health local y HTTPS.
+9. Verificar login y flujos administrativos.
+10. Revisar Git y documentación.
 
 No se utiliza file watcher en producción.
