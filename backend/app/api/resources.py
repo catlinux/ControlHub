@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -24,7 +25,7 @@ class ResourceInput(BaseModel):
     port: int | None = Field(default=None, ge=1, le=65535)
     username: str = ""
     icon: str = ""
-    status: str = "unknown"
+    status: Literal["unknown", "online", "offline", "warning"] = "unknown"
     favorite: bool = False
     notes: str = ""
     metadata: dict = Field(default_factory=dict)
