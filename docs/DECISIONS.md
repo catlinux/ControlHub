@@ -103,3 +103,22 @@ Resource será la entidad central del dashboard. Categorías y tags proporcionan
 **Estado:** Provisional
 
 El repositorio no versionará actualmente frontend/package-lock.json. La política podrá revisarse si se decide adoptar instalaciones reproducibles mediante npm ci.
+
+
+## DEC-018 — Rate limiting en memoria para V1
+
+**Estado:** Aceptada
+
+La V1 utiliza un limitador en memoria para reducir intentos automatizados contra endpoints sensibles. Es suficiente para el despliegue inicial de un único proceso y no se considera un mecanismo distribuido.
+
+## DEC-019 — Cifrado Fernet para secretos
+
+**Estado:** Aceptada
+
+Los secretos se cifran mediante Fernet de la biblioteca cryptography. La clave se proporciona mediante CONTROLHUB_SECRET_KEY y permanece fuera del repositorio y de la base de datos. La API no devuelve el valor ni el ciphertext.
+
+## DEC-020 — Administración integrada en V1
+
+**Estado:** Aceptada
+
+La administración de la V1 permite gestionar usuarios, roles, contraseñas, secretos y consultar auditoría. Las acciones administrativas siguen protegidas por autenticación, CSRF y rate limiting cuando corresponde.
