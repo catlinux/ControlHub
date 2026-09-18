@@ -10,7 +10,7 @@ La V1 seguirá inicialmente un enfoque de **monolito modular**, evitando microse
 
 La separación lógica deberá permitir evolucionar posteriormente componentes concretos sin tener que rediseñar toda la aplicación.
 
-## 11. Capas conceptuales
+## 3. Capas conceptuales
 
 ```text
 ┌─────────────────────────────┐
@@ -31,7 +31,7 @@ La separación lógica deberá permitir evolucionar posteriormente componentes c
         └─────────────────┘
 ```
 
-## 3. Stack tecnológico
+## 4. Stack tecnológico
 
 - Backend: Python + FastAPI + SQLModel + Alembic + Uvicorn
 - Frontend: Vue 3 + TypeScript + Tailwind CSS + Pinia + Vue I18n
@@ -42,31 +42,31 @@ La separación lógica deberá permitir evolucionar posteriormente componentes c
 - Producción: Apache HTTPS → Uvicorn/systemd → FastAPI → SQLite
 - V1 sin Docker
 
-## 4. Estructura del repositorio
+## 5. Estructura del repositorio
 
 Monorepo con frontend, backend, documentación, tests y scripts. La implementación funcional todavía no ha comenzado.
 
-## 5. API y seguridad
+## 6. API y seguridad
 
 El frontend nunca accede directamente a SQLite. FastAPI escuchará únicamente en loopback en producción. La API aplicará validación de entrada, CORS restringido, CSRF, límites de petición, rate limiting en endpoints sensibles y respuestas de error coherentes.
 
-## 6. Autenticación y autorización
+## 7. Autenticación y autorización
 
 Se utilizarán sesiones server-side, cookies HttpOnly/Secure/SameSite y el modelo `User → Role → Permission`. La V1 tendrá inicialmente un rol administrativo, sin hardcodear la autorización.
 
-## 7. Panel de administración
+## 8. Panel de administración
 
 La administración forma parte de la V1 e incluirá recursos, categorías, tags, usuarios, roles/permisos, secretos, auditoría y configuración. Gestionar un recurso no implica ejecutar el servicio asociado.
 
-## 8. Auditoría y logs
+## 9. Auditoría y logs
 
 Se separarán los logs operativos de la auditoría. Ninguno almacenará contraseñas, tokens, claves privadas ni contenido de secretos.
 
-## 9. Testing y CI
+## 10. Testing y CI
 
 Backend con pytest; frontend con Vitest; flujos críticos con Playwright. GitHub Actions ejecutará lint, tests, build y comprobaciones de calidad.
 
-## 10. Evolución
+## 11. Evolución
 
 La arquitectura queda preparada para PostgreSQL, monitorización, integraciones externas y acciones remotas controladas cuando exista una necesidad real.
 
