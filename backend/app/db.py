@@ -3,10 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from alembic import command
-from alembic.config import Config
 from sqlalchemy import create_engine, inspect
 from sqlmodel import Session
+
+from alembic import command
+from alembic.config import Config
 
 
 def database_url() -> str:
