@@ -62,6 +62,7 @@ class Secret(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     description: str = ""
+    resource_id: int | None = Field(default=None, foreign_key="resources.id", index=True)
     encrypted_value: str
     created_at: str
     updated_at: str
