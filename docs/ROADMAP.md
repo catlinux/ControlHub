@@ -4,32 +4,35 @@ Este roadmap es orientativo. Las funcionalidades futuras no se consideran obliga
 
 ## V1 — Centro de control funcional
 
-### En desarrollo
+### Implementado en la rama actual
 
-- Dashboard
-- Recursos
-- Tarjetas de recursos
-- Categorías
-- Tags
-- Búsqueda
-- Favoritos
-- URLs
-- Información SSH
-- Apertura de recursos
-- Copia de comandos SSH
-- Estado básico de recursos cuando sea viable
-- Autenticación
-- Interfaz responsive/mobile-first
-- Panel de administración integrado
-- Auditoría
+- Dashboard.
+- Recursos y tarjetas.
+- Categorías y tags.
+- Búsqueda y filtros.
+- Favoritos.
+- URLs.
+- Información SSH y copia de comandos.
+- Autenticación con sesiones server-side.
+- Protección CSRF.
+- Rate limiting básico para login y acciones administrativas sensibles.
+- Panel de administración integrado.
+- Gestión básica de usuarios, roles y contraseñas.
+- Gestión de secretos cifrados separada de Resource.
+- Auditoría consultable.
+- Persistencia SQLModel con Alembic.
+- Interfaz responsive/mobile-first.
+- API REST bajo /api/v1.
+- Despliegue preparado con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
 
-### Pendiente de la V1
+### Pendiente de completar la V1
 
-- Gestión de usuarios, roles y permisos más completa.
-- Gestión cifrada de secretos.
-- Rate limiting.
-- Estados básicos de recursos.
-- Pruebas de integración y navegador.
+- Estados técnicos activos online/offline/warning sin convertirlos todavía en monitorización avanzada.
+- Pruebas de navegador con Playwright y verificación E2E del despliegue.
+- Revisión final de accesibilidad y experiencia móvil.
+- Revisión de OpenAPI y contratos de API.
+- Validación final de recuperación y documentación operativa.
+- Configuración de CONTROLHUB_SECRET_KEY en producción antes de utilizar secretos cifrados.
 
 ### No incluido inicialmente
 
