@@ -2,8 +2,8 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 import app.models
@@ -29,6 +29,16 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="ControlHub API", version="0.2.0", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def prevent_search_indexing(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(admin_management_router)
@@ -39,6 +49,14 @@ app.include_router(secrets_router)
 @app.get("/api/v1/health", tags=["system"])
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots() -> PlainTextResponse:
+    return PlainTextResponse(
+        "User-agent: *\nDisallow: /\n",
+        media_type="text/plain",
+    )
 
 
 if FRONTEND_DIST.exists():
