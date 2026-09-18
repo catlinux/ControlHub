@@ -65,3 +65,19 @@ Posibles funcionalidades:
 - Acciones remotas controladas.
 
 Las fases podrán modificarse según las necesidades reales.
+
+
+## Experiencia de uso de la V1
+
+- Portal privado como pantalla principal.
+- Recursos agrupados visualmente por categoría.
+- Favoritos, búsqueda y filtros.
+- Administración separada del portal mediante modal.
+- Administración organizada en usuarios, secretos, auditoría y sistema.
+- Gestión de recursos y categorías restringida al rol administrador.
+
+## Privacidad
+
+- Aplicación no indexable por buscadores.
+- Meta robots y cabecera X-Robots-Tag.
+- robots.txt sin sitemap.
