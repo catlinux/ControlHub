@@ -63,3 +63,15 @@ ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-rest
 4. Ejecutar pruebas de integración y navegador.
 5. Completar estados técnicos básicos y revisión final de la V1.
 6. Actualizar documentación y dejar el PR listo para revisión, sin fusionarlo automáticamente.
+
+
+## Portal y privacidad
+
+La experiencia principal de ControlHub se ha separado conceptualmente en:
+
+- **Portal:** accesos directos, recursos, favoritos, búsqueda, filtros y organización por categorías.
+- **Administración:** modal exclusivo para administradores con usuarios, secretos, auditoría y acciones de sistema.
+
+La gestión de recursos y categorías requiere rol administrador. El favorito continúa disponible para usuarios autenticados.
+
+ControlHub se considera una aplicación privada y no indexable. El backend añade X-Robots-Tag: noindex, nofollow, noarchive, nosnippet; el frontend declara la misma política mediante meta robots y /robots.txt bloquea el rastreo. No existe sitemap.
