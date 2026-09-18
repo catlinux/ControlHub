@@ -50,3 +50,6 @@ Thumbs.db
 backups/
 *.dump
 *.sql.gz
+
+# Lockfile frontend: política V1 actual
+frontend/package-lock.json
