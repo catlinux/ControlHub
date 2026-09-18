@@ -1,4 +1,4 @@
-from .resource import AuditLog, AuthSession, Category, Resource, ResourceTag, Tag, User
+from .resource import AuditLog, AuthSession, Category, Resource, ResourceTag, Secret, Tag, User
 
 __all__ = [
     "AuditLog",
@@ -6,6 +6,7 @@ __all__ = [
     "Category",
     "Resource",
     "ResourceTag",
+    "Secret",
     "Tag",
     "User",
 ]
