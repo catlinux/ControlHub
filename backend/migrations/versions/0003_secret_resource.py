@@ -1,7 +1,7 @@
 """Associate encrypted secrets with resources."""
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
 
 revision = "0003_secret_resource"
 down_revision = "0002_secrets"
