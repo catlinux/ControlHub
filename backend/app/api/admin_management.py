@@ -15,13 +15,14 @@ router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 _hasher = PasswordHasher()
 
 
-def require_admin(request: Request):
+def require_admin(request: Request, *, check_csrf: bool = True):
     session = get_session(request)
     if session is None or session["role"] != "admin":
         raise HTTPException(status_code=403, detail="Acceso de administrador requerido.")
-    csrf = request.headers.get("X-CSRF-Token")
-    if not csrf or csrf != session["csrf_token"]:
-        raise HTTPException(status_code=403, detail="CSRF inválido.")
+    if check_csrf:
+        csrf = request.headers.get("X-CSRF-Token")
+        if not csrf or csrf != session["csrf_token"]:
+            raise HTTPException(status_code=403, detail="CSRF inválido.")
     return session
 
 
@@ -41,7 +42,7 @@ class RoleInput(BaseModel):
 
 @router.get("/users")
 def list_users(request: Request):
-    require_admin(request)
+    require_admin(request, check_csrf=False)
     with db_session() as db:
         return [
             {
