@@ -12,7 +12,7 @@ def test_secret_crud_does_not_expose_value(client, monkeypatch) -> None:
         "role": "admin",
         "username": "test-admin",
     }
-    monkeypatch.setattr(secrets_api, "require_admin", lambda request: session)
+    monkeypatch.setattr(secrets_api, "get_session", lambda request: session)
     response = client.post(
         "/api/v1/secrets",
         headers={"X-CSRF-Token": "test-csrf"},
