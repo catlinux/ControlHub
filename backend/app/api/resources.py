@@ -273,6 +273,23 @@ def create_category(name: str, request: Request):
         return category
 
 
+@router.delete("/categories/{category_id}")
+def delete_category(category_id: int, request: Request):
+    session = require_user(request)
+    require_csrf(request, session)
+    with db_session() as db:
+        category = db.get(Category, category_id)
+        if category is None:
+            raise HTTPException(status_code=404, detail="Categoría no encontrada.")
+        resource = db.exec(select(Resource).where(Resource.category_id == category_id)).first()
+        if resource is not None:
+            raise HTTPException(status_code=409, detail="No se puede eliminar una categoría con recursos asociados.")
+        db.delete(category)
+        db.commit()
+        audit(session["user_id"], "category.deleted")
+        return {"status": "ok"}
+
+
 @router.get("/tags")
 def list_tags(request: Request):
     require_user(request)
