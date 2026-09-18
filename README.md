@@ -4,26 +4,28 @@ Centro de control personal para organizar, consultar y gestionar recursos de inf
 
 ## Estado del proyecto
 
-ControlHub dispone de una base funcional con autenticación, dashboard inicial y gestión de recursos en desarrollo. La rama de trabajo todavía no se ha fusionado.
+ControlHub dispone de una base funcional de la V1 con autenticación, dashboard, recursos, administración, auditoría, migraciones y almacenamiento cifrado de secretos. La rama de trabajo todavía no se ha fusionado.
 
 ## V1
 
-La V1 incluye progresivamente:
+La V1 incluye:
 
 - dashboard;
 - recursos y tarjetas;
-- categorías;
-- tags;
+- categorías y tags;
+- búsqueda y filtros;
 - favoritos;
-- búsqueda;
 - URLs;
 - información SSH y copia de comandos;
 - autenticación;
 - panel de administración;
+- usuarios y roles básicos;
+- secretos cifrados separados de Resource;
 - auditoría;
+- rate limiting básico;
 - interfaz responsive/mobile-first.
 
-Los secretos se mantendrán separados del modelo normal de recursos. No se ejecutarán comandos remotos arbitrarios desde la interfaz.
+Los secretos se mantienen separados del modelo normal de recursos. No se ejecutan comandos remotos arbitrarios desde la interfaz.
 
 ## Producción
 
@@ -33,9 +35,11 @@ Uvicorn/systemd
     |
 FastAPI
     |
-SQLite
+SQLite + Alembic
 
 El backend escucha únicamente en loopback. El puerto interno actual es 8008.
+
+La configuración de producción se mantiene en /etc/controlhub/controlhub.env y nunca se introduce en Git.
 
 La documentación de desarrollo y operación se encuentra en docs/DEVELOPMENT.md.
 
