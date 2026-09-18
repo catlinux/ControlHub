@@ -23,6 +23,10 @@ Objetivo: disponer de un centro de control personal funcional y sólido.
 - Autenticación
 - Interfaz responsive
 - Experiencia móvil cuidada
+- Panel de administración integrado
+- Gestión de usuarios, roles y permisos
+- Gestión cifrada de secretos
+- Auditoría
 
 ### No incluido inicialmente
 
