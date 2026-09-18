@@ -43,15 +43,8 @@ ControlHub está en fase de arquitectura técnica consolidada, antes de la imple
 
 ## Pendiente de decidir
 
-- Lenguaje y framework del backend.
-- Tecnología del frontend.
-- Motor de base de datos.
-- Sistema de autenticación.
-- Gestión concreta de secretos.
-- Estructura definitiva del repositorio.
-- Estrategia de despliegue.
-- Diseño detallado del modelo de datos.
-- Diseño de la API.
+- Diseño detallado del modelo de datos, antes de crear la migración inicial.
+- Detalle final de la UI y navegación, validado durante el prototipo.
 
 ## Próximo paso
 
