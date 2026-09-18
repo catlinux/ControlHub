@@ -3,11 +3,12 @@ from __future__ import annotations
 from logging.config import fileConfig
 
 from alembic import context
+from app.db import resolved_database_url
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 import app.models  # noqa: F401
-from app.db import resolved_database_url
+
 
 config = context.config
 config.set_main_option("sqlalchemy.url", resolved_database_url())
