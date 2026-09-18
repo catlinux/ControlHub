@@ -32,5 +32,3 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 include = ["app*"]
 
-[tool.ruff.lint.isort]
-known-third-party = ["alembic"]
