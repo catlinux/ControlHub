@@ -16,6 +16,7 @@ def resolved_database_url() -> str:
         path = Path(value.removeprefix("sqlite:///"))
         if not path.is_absolute():
             path = Path(__file__).resolve().parents[2] / path
+        path.parent.mkdir(parents=True, exist_ok=True)
         return "sqlite:///" + str(path)
     return value
 
