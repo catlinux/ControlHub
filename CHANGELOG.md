@@ -8,27 +8,24 @@ Todos los cambios relevantes de ControlHub se documentarán en este archivo.
 
 - Primera base funcional de autenticación con sesiones server-side.
 - Rol administrativo inicial.
-- Panel web mínimo.
-- Botón administrativo para solicitar el reinicio de `controlhub.service`.
+- Panel web responsive.
+- Botón administrativo para reiniciar controlhub.service.
 - Protección CSRF para las acciones de sesión y administración.
-- Auditoría mínima de login, logout y solicitudes de reinicio.
-- Servicio del frontend compilado desde FastAPI.
-- Documentación de instalación y operación del servicio systemd.
-- Documentación de la regla sudoers de mínimo privilegio.
+- Auditoría mínima de login, logout y acciones administrativas.
 
 ### Cambiado
 
-- El backend sirve el frontend compilado cuando existe `frontend/dist`.
-- La inicialización de la aplicación utiliza el ciclo de vida `lifespan` de FastAPI.
-- CI deja de depender de un `package-lock.json` inexistente.
+- El siguiente bloque de desarrollo pasa a centrarse en el modelo funcional de recursos de V1.
+- La configuración de producción se mantiene fuera del repositorio en /etc/controlhub/controlhub.env.
 
 ### Corregido
 
-- Formato Python incompatible con Ruff en los nuevos módulos y tests.
-- Cierre de sesión sin protección CSRF.
-- Artefactos `*.egg-info` añadidos a las exclusiones de Git.
+- Artefactos __pycache__ quedan excluidos del repositorio.
 
 ### Pendiente
 
-- Migrar la persistencia inicial de autenticación de `sqlite3` a SQLModel/Alembic.
+- Migrar la persistencia de autenticación a SQLModel/Alembic.
+- Implementar Resource, Category y Tag.
+- Implementar dashboard, búsqueda, favoritos, URL y SSH.
 - Incorporar rate limiting para endpoints sensibles.
+- Implementar gestión cifrada de secretos separada de Resource.
