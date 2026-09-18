@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import AdminPanel from "./AdminPanel.vue";
 
 type Resource = {
@@ -37,6 +37,7 @@ const categoryFilter = ref("");
 const message = ref("");
 const error = ref("");
 const showForm = ref(false);
+const showAdmin = ref(false);
 const editingId = ref<number | null>(null);
 
 const form = ref({
@@ -53,6 +54,51 @@ const form = ref({
   favorite: false,
   notes: "",
   tags: "",
+});
+
+const resourceTypeLabels: Record<string, string> = {
+  web: "Web",
+  server: "Servidor",
+  ssh: "SSH",
+  service: "Servicio",
+  database: "Base de datos",
+  git: "Git",
+  cloud: "Cloud",
+  other: "Otro",
+};
+
+const statusLabels: Record<string, string> = {
+  unknown: "Desconocido",
+  online: "Online",
+  offline: "Offline",
+  warning: "Atención",
+};
+
+const totalResources = computed(() => resources.value.length);
+const onlineResources = computed(() => resources.value.filter((item) => item.status === "online").length);
+const favoriteResources = computed(() => resources.value.filter((item) => item.favorite).length);
+
+const groupedResources = computed(() => {
+  const groups = new Map<number | null, { id: number | null; name: string; resources: Resource[] }>();
+  for (const resource of resources.value) {
+    const existing = groups.get(resource.category_id);
+    if (existing) {
+      existing.resources.push(resource);
+      continue;
+    }
+    const category = categories.value.find((item) => item.id === resource.category_id);
+    groups.set(resource.category_id, {
+      id: resource.category_id,
+      name: category?.name ?? "Sin categoría",
+      resources: [resource],
+    });
+  }
+
+  return [...groups.values()].sort((a, b) => {
+    if (a.id === null) return 1;
+    if (b.id === null) return -1;
+    return a.name.localeCompare(b.name, "es");
+  });
 });
 
 function csrfToken() {
@@ -108,6 +154,7 @@ async function loadSession() {
   username.value = data.username ?? "";
   role.value = data.role ?? "";
   loading.value = false;
+
   if (authenticated.value) {
     try {
       await loadData();
@@ -158,11 +205,13 @@ async function login(event: Event) {
     error.value = "No se pudo iniciar sesión.";
     return;
   }
+
   const result = await response.json();
   if (!result.authenticated) {
     error.value = result.error ?? "No se pudo iniciar sesión.";
     return;
   }
+
   error.value = "";
   await loadSession();
 }
@@ -204,10 +253,12 @@ async function toggleFavorite(resource: Resource) {
     headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
     body: JSON.stringify({ favorite: !resource.favorite }),
   });
+
   if (!response.ok) {
     error.value = "No se pudo cambiar el favorito.";
     return;
   }
+
   message.value = resource.favorite ? "Quitado de favoritos." : "Añadido a favoritos.";
   await loadData();
 }
@@ -215,14 +266,17 @@ async function toggleFavorite(resource: Resource) {
 async function createCategory() {
   const name = newCategory.value.trim();
   if (!name) return;
+
   const response = await fetch("/api/v1/categories?name=" + encodeURIComponent(name), {
     method: "POST",
     headers: { "X-CSRF-Token": csrfToken() },
   });
+
   if (!response.ok) {
     error.value = "No se pudo crear la categoría.";
     return;
   }
+
   newCategory.value = "";
   message.value = "Categoría creada.";
   await loadData();
@@ -230,14 +284,17 @@ async function createCategory() {
 
 async function removeResource(resource: Resource) {
   if (!confirm("¿Eliminar «" + resource.name + "»?")) return;
+
   const response = await fetch("/api/v1/resources/" + resource.id, {
     method: "DELETE",
     headers: { "X-CSRF-Token": csrfToken() },
   });
+
   if (!response.ok) {
     error.value = "No se pudo eliminar el recurso.";
     return;
   }
+
   message.value = "Recurso eliminado.";
   await loadData();
 }
@@ -249,33 +306,6 @@ async function copySsh(resource: Resource) {
   message.value = "Comando SSH copiado.";
 }
 
-async function restart() {
-  if (!confirm("¿Reiniciar ControlHub ahora?")) return;
-  const response = await fetch("/api/v1/admin/restart", {
-    method: "POST",
-    headers: { "X-CSRF-Token": csrfToken() },
-  });
-  if (!response.ok) {
-    error.value = "No se pudo solicitar el reinicio.";
-    return;
-  }
-
-  message.value = "Reinicio solicitado. Esperando recuperación…";
-  for (let index = 0; index < 15; index += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    try {
-      const health = await fetch("/api/v1/health", { cache: "no-store" });
-      if (health.ok) {
-        message.value = "ControlHub está operativo.";
-        return;
-      }
-    } catch (restartError) {
-      console.debug("Health no disponible durante el reinicio.", restartError);
-    }
-  }
-  error.value = "No se pudo verificar la recuperación.";
-}
-
 async function logout() {
   await fetch("/api/v1/auth/logout", {
     method: "POST",
@@ -283,8 +313,10 @@ async function logout() {
   });
   authenticated.value = false;
   resources.value = [];
+  showAdmin.value = false;
+  showForm.value = false;
 }
-
+ 
 onMounted(loadSession);
 </script>
 
@@ -292,100 +324,190 @@ onMounted(loadSession);
   <main class="app">
     <section class="panel">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">ControlHub</p>
-          <h1>Centro de control</h1>
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">CH</div>
+          <div>
+            <p class="eyebrow">ControlHub</p>
+            <h1>Centro de control</h1>
+          </div>
         </div>
+
         <div v-if="authenticated" class="session">
-          <span>{{ username }}</span>
-          <button class="secondary" type="button" @click="logout">Salir</button>
+          <span class="user-pill">{{ username }}</span>
+          <button v-if="role === 'admin'" class="secondary" type="button" @click="showAdmin = true">
+            ⚙ Administración
+          </button>
+          <button class="ghost" type="button" @click="logout">Salir</button>
         </div>
       </header>
 
       <template v-if="loading">
-        <p>Cargando…</p>
+        <div class="loading-card">Cargando ControlHub…</div>
       </template>
 
       <template v-else-if="!authenticated">
-        <p>Inicia sesión para acceder al panel.</p>
-        <form class="form narrow" @submit.prevent="login">
-          <label>Usuario<input name="username" autocomplete="username" required /></label>
-          <label>Contraseña<input name="password" type="password" autocomplete="current-password" required /></label>
-          <button type="submit">Iniciar sesión</button>
-        </form>
+        <section class="login-shell">
+          <div>
+            <p class="eyebrow">Acceso privado</p>
+            <h2>Tu centro de servicios</h2>
+            <p>Inicia sesión para acceder a tus recursos y accesos directos.</p>
+          </div>
+          <form class="form login-form" @submit.prevent="login">
+            <label>Usuario<input name="username" autocomplete="username" required /></label>
+            <label>Contraseña<input name="password" type="password" autocomplete="current-password" required /></label>
+            <button type="submit">Iniciar sesión</button>
+          </form>
+        </section>
       </template>
 
       <template v-else>
-        <div class="toolbar">
-          <input v-model="search" type="search" placeholder="Buscar recursos…" @input="loadData" />
-          <select v-model="categoryFilter" @change="loadData">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Portal</p>
+            <h2>Accesos directos</h2>
+            <p>Todo lo que necesitas, organizado en un único lugar.</p>
+          </div>
+          <button v-if="role === 'admin'" type="button" @click="openCreate">+ Nuevo recurso</button>
+        </section>
+
+        <section class="stats" aria-label="Resumen">
+          <article class="stat-card">
+            <span>Recursos</span>
+            <strong>{{ totalResources }}</strong>
+            <small>accesos disponibles</small>
+          </article>
+          <article class="stat-card">
+            <span>Online</span>
+            <strong>{{ onlineResources }}</strong>
+            <small>estado registrado</small>
+          </article>
+          <article class="stat-card">
+            <span>Favoritos</span>
+            <strong>{{ favoriteResources }}</strong>
+            <small>accesos destacados</small>
+          </article>
+          <article class="stat-card">
+            <span>Categorías</span>
+            <strong>{{ categories.length }}</strong>
+            <small>grupos organizados</small>
+          </article>
+        </section>
+
+        <section class="toolbar portal-toolbar">
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input v-model="search" type="search" placeholder="Buscar recursos…" @input="loadData" />
+          </label>
+          <select v-model="categoryFilter" aria-label="Filtrar por categoría" @change="loadData">
             <option value="">Todas las categorías</option>
             <option v-for="category in categories" :key="category.id" :value="category.id">
               {{ category.name }}
             </option>
           </select>
-          <select v-model="tagFilter" @change="loadData">
+          <select v-model="tagFilter" aria-label="Filtrar por tag" @change="loadData">
             <option value="">Todos los tags</option>
             <option v-for="tag in tags" :key="tag.id" :value="tag.name">{{ tag.name }}</option>
           </select>
-          <label class="check"><input v-model="favoriteOnly" type="checkbox" @change="loadData" /> Favoritos</label>
-          <div class="category-create">
-            <input v-model="newCategory" placeholder="Nueva categoría" maxlength="100" @keyup.enter="createCategory" />
-            <button class="secondary" type="button" @click="createCategory">Crear categoría</button>
-          </div>
-          <button type="button" @click="openCreate">+ Recurso</button>
-          <button class="secondary" type="button" @click="restart">Reiniciar</button>
-        </div>
+          <label class="favorite-filter">
+            <input v-model="favoriteOnly" type="checkbox" @change="loadData" />
+            <span>★ Favoritos</span>
+          </label>
+          <template v-if="role === 'admin'">
+            <div class="category-create">
+              <input v-model="newCategory" placeholder="Nueva categoría" maxlength="100" @keyup.enter="createCategory" />
+              <button class="secondary" type="button" @click="createCategory">Crear</button>
+            </div>
+          </template>
+        </section>
 
-        <div v-if="resources.length" class="resource-grid">
-          <article v-for="resource in resources" :key="resource.id" class="resource-card">
-            <div class="card-head">
+        <section v-if="groupedResources.length" class="resource-sections">
+          <section v-for="group in groupedResources" :key="group.id ?? 'uncategorized'" class="resource-section">
+            <div class="section-heading">
               <div>
-                <span class="type">{{ resource.resource_type }}</span>
-                <h2>{{ resource.icon ? resource.icon + " " : "" }}{{ resource.name }}</h2>
+                <p class="eyebrow">Categoría</p>
+                <h2>{{ group.name }}</h2>
               </div>
-              <div class="card-badges">
-                <button class="favorite-button" type="button" :aria-label="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'" :title="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'" @click="toggleFavorite(resource)">{{ resource.favorite ? '★' : '☆' }}</button>
-                <span :class="['status', resource.status]">{{ resource.status }}</span>
-              </div>
+              <span>{{ group.resources.length }} {{ group.resources.length === 1 ? "recurso" : "recursos" }}</span>
             </div>
-            <p v-if="resource.description">{{ resource.description }}</p>
-            <p v-if="resource.host" class="connection">
-              {{ resource.username ? resource.username + "@" : "" }}{{ resource.host }}{{ resource.port ? ":" + resource.port : "" }}
-            </p>
-            <div class="tags">
-              <span v-for="tag in resource.tags" :key="tag">{{ tag }}</span>
+
+            <div class="resource-grid">
+              <article v-for="resource in group.resources" :key="resource.id" class="resource-card">
+                <div class="card-head">
+                  <div class="resource-title">
+                    <div class="resource-icon" aria-hidden="true">{{ resource.icon || "◆" }}</div>
+                    <div>
+                      <span class="type">{{ resourceTypeLabels[resource.resource_type] || resource.resource_type }}</span>
+                      <h3>{{ resource.name }}</h3>
+                    </div>
+                  </div>
+                  <div class="card-badges">
+                    <button
+                      class="favorite-button"
+                      type="button"
+                      :aria-label="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+                      :title="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+                      @click="toggleFavorite(resource)"
+                    >
+                      {{ resource.favorite ? "★" : "☆" }}
+                    </button>
+                    <span :class="['status', resource.status]">
+                      <span class="status-dot" aria-hidden="true"></span>
+                      {{ statusLabels[resource.status] || resource.status }}
+                    </span>
+                  </div>
+                </div>
+
+                <p v-if="resource.description" class="resource-description">{{ resource.description }}</p>
+
+                <p v-if="resource.host" class="connection">
+                  {{ resource.username ? resource.username + "@" : "" }}{{ resource.host }}{{ resource.port ? ":" + resource.port : "" }}
+                </p>
+
+                <div v-if="resource.tags.length" class="tags">
+                  <span v-for="tag in resource.tags" :key="tag">{{ tag }}</span>
+                </div>
+
+                <div class="card-actions">
+                  <a v-if="resource.url" class="primary-link" :href="resource.url" target="_blank" rel="noopener noreferrer">Abrir</a>
+                  <button v-if="resource.host" class="secondary" type="button" @click="copySsh(resource)">Copiar SSH</button>
+                  <template v-if="role === 'admin'">
+                    <button class="secondary" type="button" @click="openEdit(resource)">Editar</button>
+                    <button class="danger" type="button" @click="removeResource(resource)">Eliminar</button>
+                  </template>
+                </div>
+              </article>
             </div>
-            <div class="card-actions">
-              <a v-if="resource.url" :href="resource.url" target="_blank" rel="noreferrer">Abrir</a>
-              <button v-if="resource.host" type="button" @click="copySsh(resource)">Copiar SSH</button>
-              <button type="button" @click="openEdit(resource)">Editar</button>
-              <button class="danger" type="button" @click="removeResource(resource)">Eliminar</button>
-            </div>
-          </article>
-        </div>
+          </section>
+        </section>
 
         <div v-else class="empty">
-          <h2>Encara no hi ha recursos</h2>
-          <p>Afegeix el primer recurs per començar.</p>
-          <button type="button" @click="openCreate">Crear recurs</button>
+          <div class="empty-icon" aria-hidden="true">◆</div>
+          <h2>No hay recursos todavía</h2>
+          <p>Cuando añadas tus servicios, aparecerán aquí organizados por categorías.</p>
+          <button v-if="role === 'admin'" type="button" @click="openCreate">Crear primer recurso</button>
         </div>
 
         <p v-if="message" class="message">{{ message }}</p>
         <p v-if="error" class="error">{{ error }}</p>
-        <AdminPanel v-if="role === 'admin'" />
+
+        <AdminPanel v-if="showAdmin" @close="showAdmin = false" />
       </template>
     </section>
 
     <div v-if="showForm" class="modal-backdrop" @click.self="showForm = false">
-      <section class="modal">
+      <section class="modal resource-modal" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
         <header class="modal-head">
-          <h2>{{ editingId ? "Editar recurso" : "Nuevo recurso" }}</h2>
-          <button class="secondary" type="button" @click="showForm = false">×</button>
+          <div>
+            <p class="eyebrow">Administración de recursos</p>
+            <h2 id="resource-modal-title">{{ editingId ? "Editar recurso" : "Nuevo recurso" }}</h2>
+          </div>
+          <button class="icon-button" type="button" aria-label="Cerrar" @click="showForm = false">×</button>
         </header>
+
         <form class="form" @submit.prevent="saveResource">
           <label>Nombre<input v-model="form.name" required maxlength="200" /></label>
           <label>Descripción<textarea v-model="form.description" rows="2" /></label>
+
           <div class="form-grid">
             <label>Tipo
               <select v-model="form.resource_type">
@@ -406,29 +528,35 @@ onMounted(loadSession);
               </select>
             </label>
           </div>
+
           <label>URL<input v-model="form.url" type="url" placeholder="https://…" /></label>
+
+          <div class="form-grid">
+            <label>Host/IP<input v-model="form.host" /></label>
+            <label>Puerto<input v-model.number="form.port" type="number" min="1" max="65535" /></label>
+          </div>
+
+          <div class="form-grid">
+            <label>Usuario<input v-model="form.username" /></label>
+            <label>Icono<input v-model="form.icon" placeholder="🌐" /></label>
+          </div>
+
           <label>Estado
             <select v-model="form.status">
               <option value="unknown">Desconocido</option>
               <option value="online">Online</option>
               <option value="offline">Offline</option>
-              <option value="warning">Warning</option>
+              <option value="warning">Atención</option>
             </select>
           </label>
-          <div class="form-grid">
-            <label>Host/IP<input v-model="form.host" /></label>
-            <label>Puerto<input v-model.number="form.port" type="number" min="1" max="65535" /></label>
-          </div>
-          <div class="form-grid">
-            <label>Usuario<input v-model="form.username" /></label>
-            <label>Icono<input v-model="form.icon" placeholder="🖥️" /></label>
-          </div>
+
           <label>Tags<input v-model="form.tags" placeholder="producción, linux, web" /></label>
           <label>Notas<textarea v-model="form.notes" rows="3" /></label>
           <label class="check"><input v-model="form.favorite" type="checkbox" /> Favorito</label>
+
           <div class="modal-actions">
             <button class="secondary" type="button" @click="showForm = false">Cancelar</button>
-            <button type="submit">Guardar</button>
+            <button type="submit">Guardar recurso</button>
           </div>
         </form>
       </section>
