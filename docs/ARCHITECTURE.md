@@ -2,93 +2,135 @@
 
 ## 1. Objetivo
 
-La arquitectura de ControlHub proporciona una base sencilla para un centro de control personal extensible, evitando microservicios y complejidad distribuida mientras no exista una necesidad real.
+La arquitectura de ControlHub debe proporcionar una base sencilla para la primera versión y, al mismo tiempo, permitir la incorporación progresiva de nuevos tipos de recursos, integraciones y funciones de supervisión.
 
 ## 2. Enfoque
 
-La V1 utiliza un monolito modular:
+La V1 seguirá inicialmente un enfoque de **monolito modular**, evitando microservicios y complejidad distribuida mientras no exista una necesidad real que los justifique.
 
-Apache HTTPS
-    |
-Uvicorn / systemd
-    |
-FastAPI
-    |-- autenticación/autorización
-    |-- recursos
-    |-- administración
-    |-- servicios
-    |
-SQLModel
-    |
-SQLite
+La separación lógica deberá permitir evolucionar posteriormente componentes concretos sin tener que rediseñar toda la aplicación.
 
-## 3. Stack
+## 3. Capas conceptuales
 
-- Backend: Python + FastAPI + SQLModel + Uvicorn.
-- Migraciones: Alembic.
-- Frontend: Vue 3 + TypeScript.
-- Persistencia V1: SQLite.
-- API REST versionada bajo /api/v1.
-- Producción: Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
-- V1 sin Docker.
+```text
+┌─────────────────────────────┐
+│          Frontend           │
+├─────────────────────────────┤
+│             API             │
+├─────────────────────────────┤
+│       Lógica de negocio     │
+├─────────────────────────────┤
+│ Persistencia / Base de datos│
+└─────────────────────────────┘
 
-## 4. Estructura
+        Integraciones externas
+                 │
+                 ▼
+        ┌─────────────────┐
+        │  Integrations   │
+        └─────────────────┘
+```
 
-- app/api: endpoints HTTP.
-- app/auth: autenticación y sesiones.
-- app/models: modelos persistentes.
-- app/db.py: motor y sesiones de base de datos.
-- app/services: lógica de negocio que se vaya extrayendo.
-- app/security: controles de seguridad específicos.
-- frontend: interfaz Vue.
-- docs: documentación y decisiones.
+## 4. Stack tecnológico
 
-## 5. Modelo de recursos
+- Backend: Python + FastAPI + SQLModel + Alembic + Uvicorn
+- Frontend: Vue 3 + TypeScript + Tailwind CSS + Pinia + Vue I18n
+- Base de datos V1: SQLite
+- API REST versionada bajo `/api/v1`
+- Autenticación mediante sesiones server-side y cookies seguras
+- Contraseñas con Argon2id
+- Producción: Apache HTTPS → Uvicorn/systemd → FastAPI → SQLite
+- V1 sin Docker
 
-Resource será la entidad central de la V1.
+## 5. Estructura del repositorio
 
-Incluye:
+Monorepo con frontend, backend, documentación, tests y scripts.
 
-- identidad: nombre, descripción y tipo;
-- organización: categoría, tags y favorito;
-- conexión: URL, host, puerto y usuario;
-- presentación: icono y estado;
-- notas y metadatos específicos.
+La aplicación se implementará como un monolito modular. Las responsabilidades de API, autenticación, lógica de negocio y persistencia deben permanecer separadas aunque se ejecuten como un único servicio.
 
-Relaciones:
+## 6. API y seguridad
 
-Category 1 -> N Resource
-Resource N -> N Tag
+El frontend nunca accede directamente a SQLite. FastAPI escucha únicamente en loopback en producción. La API debe aplicar validación de entrada, CORS restringido, CSRF, límites de petición, rate limiting en endpoints sensibles y respuestas de error coherentes.
 
-Las contraseñas, tokens, claves privadas y otros secretos no forman parte de Resource.
+## 7. Autenticación y autorización
 
-## 6. API
+Se utilizan sesiones server-side, cookies HttpOnly/Secure/SameSite y el modelo `User → Role → Permission`. La V1 comienza con un rol administrativo.
 
-Los recursos expondrán inicialmente:
+La implementación inicial de autenticación del prototipo utiliza SQLite mediante el módulo estándar `sqlite3` para poder validar el flujo completo rápidamente. Esto es una implementación transitoria: antes de ampliar el modelo funcional de V1, las tablas de autenticación deberán integrarse en el modelo SQLModel y gestionarse mediante Alembic, manteniendo una única estrategia de persistencia.
 
-- GET /api/v1/resources
-- GET /api/v1/resources/{id}
-- POST /api/v1/resources
-- PUT /api/v1/resources/{id}
-- DELETE /api/v1/resources/{id}
-- GET /api/v1/categories
-- POST /api/v1/categories
-- GET /api/v1/tags
+## 8. Panel de administración
 
-La búsqueda se realizará mediante filtros de API. El frontend nunca accederá directamente a SQLite.
+La administración forma parte de la V1 e incluirá recursos, categorías, tags, usuarios, roles/permisos, secretos, auditoría y configuración.
 
-## 7. Seguridad
+La acción actual de reinicio está limitada a `controlhub.service`. No se permite ejecutar comandos arbitrarios desde la interfaz.
 
-La autenticación utiliza sesiones server-side, cookies HttpOnly/Secure/SameSite y Argon2id. Las mutaciones requieren CSRF.
+## 9. Auditoría y logs
 
-La acción administrativa de reinicio está limitada a una orden exacta de systemd mediante sudoers de mínimo privilegio. ControlHub no ejecuta comandos remotos arbitrarios.
+Se separarán los logs operativos de la auditoría. Ninguno almacenará contraseñas, tokens, claves privadas ni contenido de secretos.
 
-Los secretos quedan fuera del modelo normal de recursos y se diseñará un subsistema cifrado separado.
+## 10. Testing y CI
 
-## 8. Testing
+Backend con pytest y Ruff; frontend con Vitest, ESLint y build de producción. Los flujos críticos se cubrirán progresivamente con Playwright. GitHub Actions ejecutará las comprobaciones del backend y frontend.
 
-Backend: pytest + Ruff. Frontend: Vitest + ESLint + build. Los flujos de navegador se cubrirán progresivamente con Playwright.
+## 11. Recurso como entidad central
 
-## 9. Internacionalización
+El concepto principal de ControlHub será `Resource`.
 
-El software empieza en castellano y la arquitectura evita acoplar de forma irreversible los textos a la lógica para permitir i18n futura.
+Un recurso podrá representar diferentes clases de elementos digitales sin obligar a crear un modelo completamente independiente para cada tipo.
+
+Conceptualmente:
+
+```text
+Resource
+├── identity
+│   ├── name
+│   ├── description
+│   └── type
+├── organization
+│   ├── category
+│   ├── tags
+│   └── favorite
+├── connection
+│   ├── url
+│   ├── host
+│   ├── port
+│   └── username
+├── presentation
+│   ├── icon
+│   └── status
+└── metadata
+    └── type-specific data
+```
+
+## 12. Secretos
+
+Las credenciales y secretos no deben almacenarse como texto plano dentro del modelo normal de recursos.
+
+El modelo de recursos podrá contener referencias o información no sensible necesaria para identificar o conectar con un recurso, mientras que contraseñas, tokens, claves privadas y otros secretos deberán gestionarse mediante un mecanismo separado.
+
+La solución concreta de almacenamiento de secretos se definirá durante el diseño de seguridad.
+
+## 13. Seguridad
+
+La seguridad es un requisito arquitectónico desde la V1.
+
+Se deberán considerar como mínimo:
+
+- autenticación;
+- autorización;
+- gestión segura de sesiones;
+- protección frente a CSRF y XSS cuando corresponda;
+- validación de entradas;
+- gestión de secretos;
+- HTTPS en producción;
+- control de acceso;
+- logs;
+- mínimo privilegio.
+
+ControlHub no deberá ejecutar comandos remotos arbitrarios simplemente como consecuencia de una acción de interfaz.
+
+## 14. Internacionalización
+
+La aplicación comenzará en castellano, pero la arquitectura deberá evitar que los textos estén acoplados de forma irreversible al código.
+
+La internacionalización se preparará desde el principio para permitir incorporar otros idiomas posteriormente.

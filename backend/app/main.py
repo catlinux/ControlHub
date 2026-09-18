@@ -8,14 +8,17 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
-from app.auth.service import ensure_admin, init_auth_db
+from app.api.resources import router as resources_router
+from app.auth.service import ensure_admin
+from app.db import init_db
+from app.models import AuditLog, AuthSession, Category, Resource, ResourceTag, Tag, User
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    init_auth_db()
+    init_db()
     ensure_admin(
         os.getenv("CONTROLHUB_ADMIN_USERNAME", ""),
         os.getenv("CONTROLHUB_ADMIN_PASSWORD", ""),
@@ -23,9 +26,10 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="ControlHub API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="ControlHub API", version="0.2.0", lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(resources_router)
 
 
 @app.get("/api/v1/health", tags=["system"])

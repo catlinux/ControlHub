@@ -4,56 +4,35 @@
 
 ## Estado general
 
-ControlHub ya dispone de una base funcional ejecutable y está avanzando sobre la V1 real. El despliegue de la aplicación en el Debian doméstico está operativo mediante Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
+ControlHub ha pasado del esqueleto técnico a una primera base funcional ejecutable.
 
-## Repositorio
+## Estado actual
 
-- Repositorio: catlinux/ControlHub.
-- Rama de trabajo: feature/admin-restart.
-- PR #1: abierto y en estado draft; no debe fusionarse todavía.
-- CI del commit 31e05a36a3e6963e2b11c464711c53cd7cc3f264: backend y frontend correctos.
-- La rama contiene autenticación, sesión, CSRF, auditoría y reinicio administrativo.
-- La siguiente etapa de implementación es el modelo funcional de recursos de la V1.
+- Backend FastAPI ejecutable mediante Uvicorn/systemd.
+- Frontend Vue 3 + TypeScript.
+- Autenticación inicial con sesiones server-side almacenadas en SQLite.
+- Rol administrativo inicial.
+- Panel web mínimo.
+- Acción administrativa `Reiniciar ControlHub`.
+- Protección CSRF para las acciones de sesión y administración.
+- Auditoría mínima de login, logout y solicitudes de reinicio.
+- El servicio de producción utiliza el puerto interno configurable 8008.
+- El frontend compilado puede ser servido por FastAPI detrás de Apache.
 
-## Producción Debian
+## Integración pendiente en Debian
 
-- Usuario de servicio: stark.
-- Aplicación: /opt/controlhub.
-- Backend: 127.0.0.1:8008.
-- Apache publica https://hub.warcrafted.com.
-- Certificado HTTPS operativo y renovación automática configurada.
-- Configuración de producción: /etc/controlhub/controlhub.env.
-- Servicio: controlhub.service, habilitado y activo.
-- Sudoers permite exclusivamente /bin/systemctl restart controlhub.service.
-- Verificado en servidor: health local y health HTTPS devuelven {"status":"ok"}.
+El entorno existente puede conservar `CONTROLHUB_HOST=127.0.0.1` y `CONTROLHUB_PORT=8008`.
 
-## Funcionalidad implementada
+Hay que añadir al entorno de producción las credenciales iniciales del administrador y, para habilitar el botón, una regla sudoers exacta que permita únicamente reiniciar `controlhub.service`.
 
-- Autenticación con sesiones server-side.
-- Argon2id para contraseñas.
-- Protección CSRF.
-- Auditoría básica.
-- Panel web responsive.
-- Reinicio administrativo seguro y limitado.
+El frontend debe compilarse antes de poner esta versión detrás de Apache.
 
-## Deuda técnica y seguridad
+## Deuda técnica conocida
 
-- La persistencia inicial de autenticación sigue utilizando sqlite3 directo; antes de ampliar el modelo de recursos debe migrarse al modelo SQLModel común.
-- Rate limiting de login y otros endpoints sensibles sigue pendiente.
-- El sistema de secretos cifrados separado del modelo Resource sigue pendiente.
-- La gestión avanzada de roles/permisos sigue pendiente.
-- La comprobación de estado de recursos todavía no ejecuta monitorización activa.
-- Alembic debe quedar establecido para las migraciones de esquema antes de ampliar más el modelo.
-- Deben añadirse pruebas de integración y Playwright progresivamente.
+La autenticación inicial utiliza directamente `sqlite3` como implementación transitoria del prototipo. La decisión arquitectónica de V1 sigue siendo SQLite + SQLModel + Alembic; antes de ampliar el modelo funcional de recursos se deberá migrar esta persistencia al modelo común y crear la migración Alembic correspondiente.
 
-## Entorno local
+También queda pendiente incorporar rate limiting para endpoints sensibles antes de considerar la autenticación lista para producción.
 
-Tras ejecutar npm install, el entorno local puede generar frontend/package-lock.json. El repositorio actual no lo versiona; no debe añadirse automáticamente sin una decisión explícita sobre la política de lockfiles del proyecto.
+## Próximo paso
 
-## Siguiente bloque de trabajo
-
-1. Consolidar SQLModel/Alembic para la persistencia común.
-2. Implementar Resource, Category y Tag.
-3. Implementar dashboard, búsqueda, favoritos, URL y SSH.
-4. Verificar CI y desplegar.
-5. Añadir rate limiting y pruebas de integración.
+Integrar esta versión en Debian, construir el frontend y verificar login → panel → reinicio → recuperación. Después completar el modelo SQLModel/Alembic y comenzar el modelo funcional de recursos de V1.
