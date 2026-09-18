@@ -10,7 +10,10 @@ router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 def require_admin(request: Request):
     session = get_session(request)
     if session is None or session["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Acceso de administrador requerido.")
+        raise HTTPException(
+            status_code=403,
+            detail="Acceso de administrador requerido.",
+        )
 
     csrf = request.headers.get("X-CSRF-Token")
     if not csrf or csrf != session["csrf_token"]:
