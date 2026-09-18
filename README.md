@@ -4,35 +4,46 @@ Centro de control personal para organizar, consultar y gestionar recursos de inf
 
 ## Estado del proyecto
 
-ControlHub dispone de una primera base funcional ejecutable con autenticación, panel inicial y una acción administrativa controlada para reiniciar el servicio de la aplicación.
+ControlHub dispone de una base funcional con autenticación, dashboard inicial y gestión de recursos en desarrollo. La rama de trabajo todavía no se ha fusionado.
 
 ## V1
 
-La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, información SSH, autenticación, panel de administración integrado, gestión de secretos cifrados, auditoría e interfaz responsive/mobile-first. La arquitectura quedará preparada para internacionalización futura.
+La V1 incluye progresivamente:
 
-La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
+- dashboard;
+- recursos y tarjetas;
+- categorías;
+- tags;
+- favoritos;
+- búsqueda;
+- URLs;
+- información SSH y copia de comandos;
+- autenticación;
+- panel de administración;
+- auditoría;
+- interfaz responsive/mobile-first.
+
+Los secretos se mantendrán separados del modelo normal de recursos. No se ejecutarán comandos remotos arbitrarios desde la interfaz.
 
 ## Producción
 
-```text
 Apache HTTPS
-    ↓
+    |
 Uvicorn/systemd
-    ↓
+    |
 FastAPI
-    ↓
+    |
 SQLite
-```
 
-El backend escucha únicamente en loopback. El puerto interno actual es 8008 y se configura mediante el entorno.
+El backend escucha únicamente en loopback. El puerto interno actual es 8008.
 
-La documentación de despliegue y operación se encuentra en [Desarrollo](docs/DEVELOPMENT.md).
+La documentación de desarrollo y operación se encuentra en docs/DEVELOPMENT.md.
 
 ## Documentación
 
-- [Arquitectura](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Desarrollo](docs/DEVELOPMENT.md)
-- [Estado del proyecto](docs/PROJECT-STATE.md)
-- [Registro de decisiones](docs/DECISIONS.md)
-- [Changelog](CHANGELOG.md)
+- docs/ARCHITECTURE.md
+- docs/ROADMAP.md
+- docs/DEVELOPMENT.md
+- docs/PROJECT-STATE.md
+- docs/DECISIONS.md
+- CHANGELOG.md
