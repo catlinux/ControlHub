@@ -7,7 +7,7 @@ def test_admin_users_and_audit(client, monkeypatch) -> None:
         "role": "admin",
         "username": "test-admin",
     }
-    monkeypatch.setattr(admin_api, "require_admin", lambda request: session)
+    monkeypatch.setattr(admin_api, "get_session", lambda request: session)
 
     response = client.post(
         "/api/v1/admin/users",
