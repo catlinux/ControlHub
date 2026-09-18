@@ -97,8 +97,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index("ix_secrets_name", table_name="secrets")
-    op.drop_table("secrets")
     op.drop_table("resource_tags")
     for index, table in [
         ("ix_resources_resource_type", "resources"),
