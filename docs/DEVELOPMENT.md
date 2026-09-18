@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-El proyecto se encuentra en fase de diseño técnico. Todavía no se ha definido ni implementado el stack definitivo.
+El proyecto se encuentra en fase de arquitectura técnica consolidada. El stack de V1 ya está definido, pero la implementación funcional todavía no ha comenzado.
 
 ## Principios de trabajo
 
