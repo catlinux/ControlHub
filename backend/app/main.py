@@ -6,12 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+import app.models
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.resources import router as resources_router
 from app.auth.service import ensure_admin
 from app.db import init_db
-import app.models  # noqa: F401
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
