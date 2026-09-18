@@ -44,3 +44,21 @@ def test_admin_users_and_audit(client, monkeypatch) -> None:
         headers={"X-CSRF-Token": "test-csrf"},
     )
     assert deleted.status_code == 200
+
+
+def test_admin_read_endpoints_do_not_require_csrf(client, monkeypatch) -> None:
+    import app.api.admin_management as admin_api
+    import app.api.secrets as secrets_api
+
+    session = {
+        "user_id": 1,
+        "csrf_token": "test-csrf",
+        "role": "admin",
+        "username": "test-admin",
+    }
+    monkeypatch.setattr(admin_api, "get_session", lambda request: session)
+    monkeypatch.setattr(secrets_api, "get_session", lambda request: session)
+
+    assert client.get("/api/v1/admin/users").status_code == 200
+    assert client.get("/api/v1/admin/audit").status_code == 200
+    assert client.get("/api/v1/secrets").status_code == 200
