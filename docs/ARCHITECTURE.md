@@ -16,11 +16,11 @@ FastAPI
     |-- autenticación/autorización
     |-- recursos
     |-- administración
-    |-- servicios
+    |-- secretos
     |
 SQLModel
     |
-SQLite
+SQLite + Alembic
 
 ## 3. Stack
 
@@ -37,15 +37,17 @@ SQLite
 - app/api: endpoints HTTP.
 - app/auth: autenticación y sesiones.
 - app/models: modelos persistentes.
-- app/db.py: motor y sesiones de base de datos.
+- app/security: controles de seguridad.
+- app/secrets.py: cifrado mediante Fernet.
+- app/db.py: motor, sesiones y arranque de migraciones.
 - app/services: lógica de negocio que se vaya extrayendo.
-- app/security: controles de seguridad específicos.
 - frontend: interfaz Vue.
 - docs: documentación y decisiones.
+- alembic: evolución del esquema.
 
 ## 5. Modelo de recursos
 
-Resource será la entidad central de la V1.
+Resource es la entidad central de la V1.
 
 Incluye:
 
@@ -62,33 +64,59 @@ Resource N -> N Tag
 
 Las contraseñas, tokens, claves privadas y otros secretos no forman parte de Resource.
 
-## 6. API
+## 6. Secretos
 
-Los recursos expondrán inicialmente:
+Secret es una entidad separada que almacena únicamente un valor cifrado.
+
+- Cifrado: Fernet de cryptography.
+- Clave: CONTROLHUB_SECRET_KEY, fuera del repositorio y de la base de datos.
+- La API de listado devuelve sólo metadatos.
+- Las operaciones están limitadas a administración.
+- No se implementa criptografía propia.
+
+## 7. API
+
+Los recursos exponen inicialmente:
 
 - GET /api/v1/resources
 - GET /api/v1/resources/{id}
 - POST /api/v1/resources
 - PUT /api/v1/resources/{id}
+- PATCH /api/v1/resources/{id}/favorite
 - DELETE /api/v1/resources/{id}
 - GET /api/v1/categories
 - POST /api/v1/categories
+- DELETE /api/v1/categories/{id}
 - GET /api/v1/tags
 
-La búsqueda se realizará mediante filtros de API. El frontend nunca accederá directamente a SQLite.
+Administración:
 
-## 7. Seguridad
+- GET/POST /api/v1/admin/users
+- PATCH /api/v1/admin/users/{id}/role
+- PATCH /api/v1/admin/users/{id}/password
+- DELETE /api/v1/admin/users/{id}
+- GET /api/v1/admin/audit
+- POST /api/v1/admin/restart
+
+Secretos:
+
+- GET/POST /api/v1/secrets
+- PUT/DELETE /api/v1/secrets/{id}
+
+La búsqueda se realiza mediante filtros de API. El frontend nunca accede directamente a SQLite.
+
+## 8. Seguridad
 
 La autenticación utiliza sesiones server-side, cookies HttpOnly/Secure/SameSite y Argon2id. Las mutaciones requieren CSRF.
 
+Los endpoints sensibles incorporan rate limiting en memoria, adecuado al despliegue V1 de un único proceso.
+
 La acción administrativa de reinicio está limitada a una orden exacta de systemd mediante sudoers de mínimo privilegio. ControlHub no ejecuta comandos remotos arbitrarios.
 
-Los secretos quedan fuera del modelo normal de recursos y se diseñará un subsistema cifrado separado.
-
-## 8. Testing
+## 9. Testing
 
 Backend: pytest + Ruff. Frontend: Vitest + ESLint + build. Los flujos de navegador se cubrirán progresivamente con Playwright.
 
-## 9. Internacionalización
+## 10. Internacionalización y accesibilidad
 
-El software empieza en castellano y la arquitectura evita acoplar de forma irreversible los textos a la lógica para permitir i18n futura.
+El software empieza en castellano. La arquitectura evita acoplar de forma irreversible los textos a la lógica para permitir i18n futura. La interfaz debe mantener controles accesibles y usable en móvil.
