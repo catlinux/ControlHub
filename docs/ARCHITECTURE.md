@@ -43,7 +43,7 @@ SQLite + Alembic
 - app/services: lógica de negocio que se vaya extrayendo.
 - frontend: interfaz Vue.
 - docs: documentación y decisiones.
-- alembic: evolución del esquema.
+- migrations: scripts de Alembic para evolución del esquema.
 
 ## 5. Modelo de recursos
 
