@@ -142,13 +142,18 @@ async function login(event: Event) {
   const response = await fetch("/api/v1/auth/login", {
     method: "POST",
     body,
-    redirect: "manual",
   });
 
-  if (response.status !== 303) {
+  if (!response.ok) {
     error.value = "No se pudo iniciar sesión.";
     return;
   }
+  const result = await response.json();
+  if (!result.authenticated) {
+    error.value = result.error ?? "No se pudo iniciar sesión.";
+    return;
+  }
+  error.value = "";
   await loadSession();
 }
 
