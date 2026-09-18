@@ -34,9 +34,9 @@ def login(
     if user is None:
         return {"authenticated": False, "error": "Credenciales no válidas."}
 
-    session_id, csrf_token = create_session(user["id"])
-    audit(user["id"], "auth.login")
-    response = JSONResponse({"authenticated": True, "username": user["username"]})
+    session_id, csrf_token = create_session(user.id)
+    audit(user.id, "auth.login")
+    response = JSONResponse({"authenticated": True, "username": user.username})
     response.set_cookie(
         "controlhub_session",
         session_id,
