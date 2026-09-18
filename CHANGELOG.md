@@ -42,3 +42,26 @@ Todos los cambios relevantes de ControlHub se documentarán en este archivo.
 - Estados técnicos activos de recursos.
 - Revisión final de accesibilidad y contratos OpenAPI.
 - Configuración de CONTROLHUB_SECRET_KEY en producción.
+
+
+## [Unreleased]
+
+### Añadido
+
+- Portal principal privado orientado a accesos directos.
+- Resumen visual de recursos, estados, favoritos y categorías.
+- Agrupación de recursos por categoría.
+- Administración modal separada del portal.
+- Secciones administrativas para usuarios, secretos, auditoría y sistema.
+- Protección explícita contra indexación mediante meta robots, X-Robots-Tag y robots.txt.
+
+### Cambiado
+
+- La pantalla principal deja de mostrar el panel administrativo completo.
+- Los usuarios no administradores utilizan ControlHub como portal y no reciben controles de gestión de recursos o categorías.
+- La gestión de recursos y categorías queda restringida al rol administrador.
+- La acción de reinicio pasa al área administrativa.
+
+### Corregido
+
+- Textos restantes del dashboard que no estaban en castellano.
