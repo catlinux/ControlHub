@@ -11,7 +11,8 @@ ControlHub está en fase de arquitectura técnica consolidada, antes de la imple
 - Repositorio GitHub creado.
 - Visibilidad: pública.
 - Organización/propietario: Catlinux.
-- Todavía no se ha realizado la implementación inicial.
+- Se ha creado el esqueleto inicial de frontend, backend, tests, scripts y CI.
+- La implementación funcional de V1 todavía no ha comenzado.
 
 ## Decisiones confirmadas
 
@@ -48,4 +49,4 @@ ControlHub está en fase de arquitectura técnica consolidada, antes de la imple
 
 ## Próximo paso
 
-Crear la estructura inicial del monorepo y el esqueleto mínimo de frontend, backend, tests, scripts y configuración.
+Implementar la base de aplicación: configuración, persistencia SQLModel/Alembic y primer modelo de datos, manteniendo el alcance estrictamente dentro de la V1.
