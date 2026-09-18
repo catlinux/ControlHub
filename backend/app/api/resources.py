@@ -31,6 +31,10 @@ class ResourceInput(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
 
+class FavoriteInput(BaseModel):
+    favorite: bool
+
+
 def require_user(request: Request):
     session = get_session(request)
     if session is None:
@@ -200,6 +204,22 @@ def update_resource(resource_id: int, payload: ResourceInput, request: Request):
         sync_tags(db, resource.id, payload.tags)
         db.commit()
         audit(session["user_id"], "resource.updated")
+        return serialize_resource(db, resource)
+
+
+@router.patch("/resources/{resource_id}/favorite")
+def set_favorite(resource_id: int, payload: FavoriteInput, request: Request):
+    session = require_user(request)
+    require_csrf(request, session)
+    with db_session() as db:
+        resource = db.get(Resource, resource_id)
+        if resource is None:
+            raise HTTPException(status_code=404, detail="Recurso no encontrado.")
+        resource.favorite = payload.favorite
+        resource.updated_at = datetime.now(UTC).isoformat()
+        db.add(resource)
+        db.commit()
+        audit(session["user_id"], "resource.favorite.changed")
         return serialize_resource(db, resource)
 
 
