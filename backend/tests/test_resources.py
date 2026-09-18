@@ -1,16 +1,9 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
-
-
-def test_resources_requires_auth():
+def test_resources_requires_auth(client) -> None:
     response = client.get("/api/v1/resources")
     assert response.status_code == 401
 
 
-def test_favorite_requires_auth():
+def test_favorite_requires_auth(client) -> None:
     response = client.patch(
         "/api/v1/resources/1/favorite",
         json={"favorite": True},
@@ -18,10 +11,15 @@ def test_favorite_requires_auth():
     assert response.status_code == 401
 
 
-def test_resource_crud_and_filters(monkeypatch) -> None:
+def test_resource_crud_and_filters(client, monkeypatch) -> None:
     import app.api.resources as resources_api
 
-    session = {"user_id": 1, "csrf_token": "test-csrf", "role": "admin", "username": "test"}
+    session = {
+        "user_id": 1,
+        "csrf_token": "test-csrf",
+        "role": "admin",
+        "username": "test",
+    }
     monkeypatch.setattr(resources_api, "require_user", lambda request: session)
     monkeypatch.setattr(resources_api, "require_csrf", lambda request, session: None)
     monkeypatch.setattr(resources_api, "audit", lambda user_id, action: None)
@@ -69,10 +67,15 @@ def test_resource_crud_and_filters(monkeypatch) -> None:
         assert response.status_code == 200
 
 
-def test_category_creation_requires_name(monkeypatch) -> None:
+def test_category_creation_requires_name(client, monkeypatch) -> None:
     import app.api.resources as resources_api
 
-    session = {"user_id": 1, "csrf_token": "test-csrf", "role": "admin", "username": "test"}
+    session = {
+        "user_id": 1,
+        "csrf_token": "test-csrf",
+        "role": "admin",
+        "username": "test",
+    }
     monkeypatch.setattr(resources_api, "require_user", lambda request: session)
     monkeypatch.setattr(resources_api, "require_csrf", lambda request, session: None)
     monkeypatch.setattr(resources_api, "audit", lambda user_id, action: None)
