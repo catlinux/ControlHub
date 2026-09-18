@@ -19,6 +19,7 @@ data/
 storage/
 
 # Archivos generados
+*.egg-info/
 dist/
 build/
 coverage/
