@@ -407,6 +407,14 @@ onMounted(loadSession);
             </label>
           </div>
           <label>URL<input v-model="form.url" type="url" placeholder="https://…" /></label>
+          <label>Estado
+            <select v-model="form.status">
+              <option value="unknown">Desconocido</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+              <option value="warning">Warning</option>
+            </select>
+          </label>
           <div class="form-grid">
             <label>Host/IP<input v-model="form.host" /></label>
             <label>Puerto<input v-model.number="form.port" type="number" min="1" max="65535" /></label>
