@@ -56,6 +56,17 @@ class ResourceTag(SQLModel, table=True):
     tag_id: int = Field(foreign_key="tags.id", primary_key=True)
 
 
+class Secret(SQLModel, table=True):
+    __tablename__ = "secrets"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True, unique=True)
+    description: str = ""
+    encrypted_value: str
+    created_at: str
+    updated_at: str
+
+
 class Resource(SQLModel, table=True):
     __tablename__ = "resources"
 
