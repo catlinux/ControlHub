@@ -8,5 +8,5 @@ from app.main import app
 def client(monkeypatch):
     monkeypatch.setenv("CONTROLHUB_ADMIN_USERNAME", "test-admin")
     monkeypatch.setenv("CONTROLHUB_ADMIN_PASSWORD", "test-password")
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="https://testserver") as test_client:
         yield test_client
