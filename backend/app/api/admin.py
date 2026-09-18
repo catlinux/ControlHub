@@ -1,9 +1,9 @@
 import subprocess
 
 from fastapi import APIRouter, HTTPException, Request
-from app.security.rate_limit import admin_limiter
 
 from app.auth.service import audit, get_session
+from app.security.rate_limit import admin_limiter
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
