@@ -100,7 +100,13 @@ def create_session(user_id: int) -> tuple[str, str]:
     with _connect() as db:
         db.execute(
             "INSERT INTO sessions VALUES (?, ?, ?, ?, ?)",
-            (session_id, user_id, csrf_token, expires.isoformat(), utcnow().isoformat()),
+            (
+                session_id,
+                user_id,
+                csrf_token,
+                expires.isoformat(),
+                utcnow().isoformat(),
+            ),
         )
     return session_id, csrf_token
 
