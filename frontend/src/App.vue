@@ -7,6 +7,11 @@ const loading = ref(true);
 const message = ref("");
 const error = ref("");
 
+function csrfToken(): string {
+  const match = document.cookie.match(/(?:^|; )controlhub_csrf=([^;]+)/);
+  return match?.[1] ?? "";
+}
+
 async function loadSession() {
   const response = await fetch("/api/v1/auth/me", { cache: "no-store" });
   const data = await response.json();
@@ -17,29 +22,46 @@ async function loadSession() {
 
 async function login(event: Event) {
   const form = event.target as HTMLFormElement;
-  const body = new URLSearchParams(new FormData(form) as any);
-  const response = await fetch("/api/v1/auth/login", { method: "POST", body, redirect: "manual" });
+  const formData = new FormData(form);
+  const body = new URLSearchParams();
+  const usernameField = formData.get("username");
+  const passwordField = formData.get("password");
+
+  if (typeof usernameField === "string") body.set("username", usernameField);
+  if (typeof passwordField === "string") body.set("password", passwordField);
+
+  const response = await fetch("/api/v1/auth/login", {
+    method: "POST",
+    body,
+    redirect: "manual",
+  });
   if (response.status !== 303) {
     error.value = "No se pudo iniciar sesión.";
     return;
   }
+
   await loadSession();
   if (!authenticated.value) error.value = "Credenciales no válidas.";
 }
 
 async function restart() {
-  if (!confirm("¿Reiniciar ControlHub ahora? La aplicación estará unos segundos no disponible.")) return;
+  if (!confirm("¿Reiniciar ControlHub ahora? La aplicación estará unos segundos no disponible.")) {
+    return;
+  }
+
   message.value = "";
   error.value = "";
-  const match = document.cookie.match(/(?:^|; )controlhub_csrf=([^;]+)/);
+
   const response = await fetch("/api/v1/admin/restart", {
     method: "POST",
-    headers: { "X-CSRF-Token": match?.[1] ?? "" },
+    headers: { "X-CSRF-Token": csrfToken() },
   });
+
   if (!response.ok) {
     error.value = "No se pudo solicitar el reinicio.";
     return;
   }
+
   message.value = "Reinicio solicitado. Comprobando recuperación…";
   for (let i = 0; i < 15; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -49,13 +71,19 @@ async function restart() {
         message.value = "ControlHub está de nuevo operativo.";
         return;
       }
-    } catch {}
+    } catch (error) {
+      console.debug("No se pudo consultar health durante el reinicio.", error);
+    }
   }
+
   error.value = "No se ha podido verificar la recuperación.";
 }
 
 async function logout() {
-  await fetch("/api/v1/auth/logout", { method: "POST" });
+  await fetch("/api/v1/auth/logout", {
+    method: "POST",
+    headers: { "X-CSRF-Token": csrfToken() },
+  });
   await loadSession();
 }
 
