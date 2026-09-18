@@ -4,7 +4,13 @@ Centro de control personal para organizar, consultar y gestionar recursos de inf
 
 ## Estado del proyecto
 
-ControlHub se encuentra en fase inicial de diseño técnico. En esta etapa se define la arquitectura, el modelo de datos, los criterios de seguridad y el alcance de la primera versión.
+ControlHub se encuentra en fase de arquitectura técnica consolidada, antes de la implementación funcional.
+
+## V1
+
+La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, información SSH, autenticación, panel de administración integrado, gestión de secretos cifrados, auditoría e interfaz responsive/mobile-first. La arquitectura quedará preparada para internacionalización futura.
+
+La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
 
 ## Objetivos
 
