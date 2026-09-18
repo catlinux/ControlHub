@@ -3,11 +3,12 @@ from __future__ import annotations
 import os
 import secrets
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from fastapi import Request
 
 _hasher = PasswordHasher()
@@ -15,7 +16,7 @@ _TTL = timedelta(hours=12)
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _db_path() -> Path:
@@ -89,7 +90,7 @@ def authenticate(username: str, password: str) -> Any:
         return None
     try:
         return row if _hasher.verify(row["password_hash"], password) else None
-    except Exception:
+    except VerificationError:
         return None
 
 
