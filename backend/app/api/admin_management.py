@@ -121,7 +121,7 @@ def delete_user(user_id: int, request: Request):
 
 @router.get("/audit")
 def list_audit(request: Request, limit: int = 100):
-    require_admin(request)
+    require_admin(request, check_csrf=False)
     limit = max(1, min(limit, 500))
     with db_session() as db:
         rows = db.exec(
