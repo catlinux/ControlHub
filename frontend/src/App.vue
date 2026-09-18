@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import AdminPanel from "./AdminPanel.vue";
 
 type Resource = {
   id: number;
@@ -23,6 +24,7 @@ type Tag = { id: number; name: string };
 
 const authenticated = ref(false);
 const username = ref("");
+const role = ref("");
 const loading = ref(true);
 const resources = ref<Resource[]>([]);
 const categories = ref<Category[]>([]);
@@ -104,6 +106,7 @@ async function loadSession() {
   const data = await response.json();
   authenticated.value = data.authenticated;
   username.value = data.username ?? "";
+  role.value = data.role ?? "";
   loading.value = false;
   if (authenticated.value) {
     try {
@@ -370,6 +373,7 @@ onMounted(loadSession);
 
         <p v-if="message" class="message">{{ message }}</p>
         <p v-if="error" class="error">{{ error }}</p>
+        <AdminPanel v-if="role === "admin"" />
       </template>
     </section>
 
