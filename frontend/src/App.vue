@@ -19,12 +19,16 @@ type Resource = {
 };
 
 type Category = { id: number; name: string };
+type Tag = { id: number; name: string };
 
 const authenticated = ref(false);
 const username = ref("");
 const loading = ref(true);
 const resources = ref<Resource[]>([]);
 const categories = ref<Category[]>([]);
+const tags = ref<Tag[]>([]);
+const tagFilter = ref("");
+const newCategory = ref("");
 const search = ref("");
 const favoriteOnly = ref(false);
 const categoryFilter = ref("");
@@ -78,18 +82,21 @@ async function loadData() {
   if (search.value.trim()) params.set("search", search.value.trim());
   if (categoryFilter.value) params.set("category_id", categoryFilter.value);
   if (favoriteOnly.value) params.set("favorite", "true");
+  if (tagFilter.value) params.set("tag", tagFilter.value);
 
-  const [resourcesResponse, categoriesResponse] = await Promise.all([
+  const [resourcesResponse, categoriesResponse, tagsResponse] = await Promise.all([
     fetch("/api/v1/resources?" + params.toString(), { cache: "no-store" }),
     fetch("/api/v1/categories", { cache: "no-store" }),
+    fetch("/api/v1/tags", { cache: "no-store" }),
   ]);
 
-  if (!resourcesResponse.ok || !categoriesResponse.ok) {
+  if (!resourcesResponse.ok || !categoriesResponse.ok || !tagsResponse.ok) {
     throw new Error("No se pudieron cargar los recursos.");
   }
 
   resources.value = await resourcesResponse.json();
   categories.value = await categoriesResponse.json();
+  tags.value = await tagsResponse.json();
 }
 
 async function loadSession() {
@@ -185,6 +192,36 @@ async function saveResource() {
   showForm.value = false;
   message.value = editingId.value ? "Recurso actualizado." : "Recurso creado.";
   resetForm();
+  await loadData();
+}
+
+async function toggleFavorite(resource: Resource) {
+  const response = await fetch("/api/v1/resources/" + resource.id + "/favorite", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
+    body: JSON.stringify({ favorite: !resource.favorite }),
+  });
+  if (!response.ok) {
+    error.value = "No se pudo cambiar el favorito.";
+    return;
+  }
+  message.value = resource.favorite ? "Quitado de favoritos." : "Añadido a favoritos.";
+  await loadData();
+}
+
+async function createCategory() {
+  const name = newCategory.value.trim();
+  if (!name) return;
+  const response = await fetch("/api/v1/categories?name=" + encodeURIComponent(name), {
+    method: "POST",
+    headers: { "X-CSRF-Token": csrfToken() },
+  });
+  if (!response.ok) {
+    error.value = "No se pudo crear la categoría.";
+    return;
+  }
+  newCategory.value = "";
+  message.value = "Categoría creada.";
   await loadData();
 }
 
@@ -284,7 +321,15 @@ onMounted(loadSession);
               {{ category.name }}
             </option>
           </select>
+          <select v-model="tagFilter" @change="loadData">
+            <option value="">Todos los tags</option>
+            <option v-for="tag in tags" :key="tag.id" :value="tag.name">{{ tag.name }}</option>
+          </select>
           <label class="check"><input v-model="favoriteOnly" type="checkbox" @change="loadData" /> Favoritos</label>
+          <div class="category-create">
+            <input v-model="newCategory" placeholder="Nueva categoría" maxlength="100" @keyup.enter="createCategory" />
+            <button class="secondary" type="button" @click="createCategory">Crear categoría</button>
+          </div>
           <button type="button" @click="openCreate">+ Recurso</button>
           <button class="secondary" type="button" @click="restart">Reiniciar</button>
         </div>
@@ -296,7 +341,10 @@ onMounted(loadSession);
                 <span class="type">{{ resource.resource_type }}</span>
                 <h2>{{ resource.icon ? resource.icon + " " : "" }}{{ resource.name }}</h2>
               </div>
-              <span :class="['status', resource.status]">{{ resource.status }}</span>
+              <div class="card-badges">
+                <button class="favorite-button" type="button" :aria-label="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'" :title="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'" @click="toggleFavorite(resource)">{{ resource.favorite ? '★' : '☆' }}</button>
+                <span :class="['status', resource.status]">{{ resource.status }}</span>
+              </div>
             </div>
             <p v-if="resource.description">{{ resource.description }}</p>
             <p v-if="resource.host" class="connection">
@@ -306,7 +354,7 @@ onMounted(loadSession);
               <span v-for="tag in resource.tags" :key="tag">{{ tag }}</span>
             </div>
             <div class="card-actions">
-              <a v-if="resource.url" :href="resource.url" target="_blank" rel="noreferrer">Obrir</a>
+              <a v-if="resource.url" :href="resource.url" target="_blank" rel="noreferrer">Abrir</a>
               <button v-if="resource.host" type="button" @click="copySsh(resource)">Copiar SSH</button>
               <button type="button" @click="openEdit(resource)">Editar</button>
               <button class="danger" type="button" @click="removeResource(resource)">Eliminar</button>
