@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 import app.models
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
+from app.api.admin_management import router as admin_management_router
 from app.api.resources import router as resources_router
 from app.api.secrets import router as secrets_router
 from app.auth.service import ensure_admin
@@ -30,6 +31,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="ControlHub API", version="0.2.0", lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(admin_management_router)
 app.include_router(resources_router)
 app.include_router(secrets_router)
 
