@@ -1,0 +1,49 @@
+# Dependencias
+node_modules/
+vendor/
+
+# Variables y secretos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Bases de datos y datos locales
+*.db
+*.sqlite
+*.sqlite3
+data/
+storage/
+
+# Archivos generados
+dist/
+build/
+coverage/
+.cache/
+.tmp/
+temp/
+
+# IDE / editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Certificados y claves privadas
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Backups
+backups/
+*.dump
+*.sql.gz
