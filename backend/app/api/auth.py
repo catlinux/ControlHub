@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Form, HTTPException, Request
+
+from app.security.rate_limit import login_limiter
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.auth.service import (
@@ -30,6 +32,9 @@ def login(
     username: str = Form(...),
     password: str = Form(...),
 ):
+    client_key = request.client.host if request.client else "unknown"
+    if not login_limiter.allow(client_key):
+        raise HTTPException(status_code=429, detail="Demasiados intentos. Inténtalo más tarde.")
     user = authenticate(username, password)
     if user is None:
         return {"authenticated": False, "error": "Credenciales no válidas."}
