@@ -11,7 +11,7 @@ from app.api.auth import router as auth_router
 from app.api.resources import router as resources_router
 from app.auth.service import ensure_admin
 from app.db import init_db
-from app.models import AuditLog, AuthSession, Category, Resource, ResourceTag, Tag, User
+import app.models  # noqa: F401
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
