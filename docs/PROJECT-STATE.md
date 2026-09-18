@@ -4,16 +4,15 @@
 
 ## Estado general
 
-ControlHub ya dispone de una base funcional ejecutable y está avanzando sobre la V1 real. El despliegue de la aplicación en el Debian doméstico está operativo mediante Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
+ControlHub está pasando de la base de autenticación al dashboard funcional de la V1. El despliegue existente en Debian continúa operativo con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
 
 ## Repositorio
 
 - Repositorio: catlinux/ControlHub.
 - Rama de trabajo: feature/admin-restart.
 - PR #1: abierto y en estado draft; no debe fusionarse todavía.
-- CI del commit 31e05a36a3e6963e2b11c464711c53cd7cc3f264: backend y frontend correctos.
-- La rama contiene autenticación, sesión, CSRF, auditoría y reinicio administrativo.
-- La siguiente etapa de implementación es el modelo funcional de recursos de la V1.
+- La última versión previamente verificada por CI fue el commit 31e05a36a3e6963e2b11c464711c53cd7cc3f264.
+- La rama actual ya contiene el primer bloque de recursos y el dashboard asociado; el nuevo CI está en ejecución y debe quedar verde antes del despliegue.
 
 ## Producción Debian
 
@@ -26,34 +25,40 @@ ControlHub ya dispone de una base funcional ejecutable y está avanzando sobre l
 - Servicio: controlhub.service, habilitado y activo.
 - Sudoers permite exclusivamente /bin/systemctl restart controlhub.service.
 - Verificado en servidor: health local y health HTTPS devuelven {"status":"ok"}.
+- El servidor todavía ejecuta la versión anterior; no se debe desplegar el nuevo dashboard hasta completar CI y las pruebas locales.
 
-## Funcionalidad implementada
+## Funcionalidad implementada en la rama
 
 - Autenticación con sesiones server-side.
 - Argon2id para contraseñas.
 - Protección CSRF.
 - Auditoría básica.
-- Panel web responsive.
 - Reinicio administrativo seguro y limitado.
+- Persistencia común mediante SQLModel.
+- Entidades User, sesión, auditoría, Category, Tag y Resource.
+- CRUD inicial de recursos.
+- Búsqueda por nombre, descripción, host y URL.
+- Filtro por categoría y favoritos.
+- Tags asociados a recursos.
+- URLs y datos SSH.
+- Copia de comandos SSH desde el dashboard.
+- Interfaz responsive inicial para tarjetas de recursos.
 
 ## Deuda técnica y seguridad
 
-- La persistencia inicial de autenticación sigue utilizando sqlite3 directo; antes de ampliar el modelo de recursos debe migrarse al modelo SQLModel común.
+- Alembic todavía debe consolidarse como mecanismo único de migraciones.
 - Rate limiting de login y otros endpoints sensibles sigue pendiente.
 - El sistema de secretos cifrados separado del modelo Resource sigue pendiente.
-- La gestión avanzada de roles/permisos sigue pendiente.
-- La comprobación de estado de recursos todavía no ejecuta monitorización activa.
-- Alembic debe quedar establecido para las migraciones de esquema antes de ampliar más el modelo.
+- La gestión avanzada de usuarios, roles y permisos sigue pendiente.
+- Los estados de recursos todavía son informativos; no hay monitorización activa.
 - Deben añadirse pruebas de integración y Playwright progresivamente.
-
-## Entorno local
-
-Tras ejecutar npm install, el entorno local puede generar frontend/package-lock.json. El repositorio actual no lo versiona; no debe añadirse automáticamente sin una decisión explícita sobre la política de lockfiles del proyecto.
+- Debe revisarse la política de frontend/package-lock.json antes de adoptar npm ci.
 
 ## Siguiente bloque de trabajo
 
-1. Consolidar SQLModel/Alembic para la persistencia común.
-2. Implementar Resource, Category y Tag.
-3. Implementar dashboard, búsqueda, favoritos, URL y SSH.
-4. Verificar CI y desplegar.
+1. Dejar CI verde para el bloque de recursos.
+2. Actualizar y verificar el servidor.
+3. Consolidar Alembic.
+4. Completar gestión de categorías y tags desde la interfaz.
 5. Añadir rate limiting y pruebas de integración.
+6. Continuar con estados básicos, administración y secretos según el orden de la V1.
