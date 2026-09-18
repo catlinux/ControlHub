@@ -373,7 +373,7 @@ onMounted(loadSession);
 
         <p v-if="message" class="message">{{ message }}</p>
         <p v-if="error" class="error">{{ error }}</p>
-        <AdminPanel v-if="role === "admin"" />
+        <AdminPanel v-if="role === 'admin'" />
       </template>
     </section>
 
