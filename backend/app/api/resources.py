@@ -43,6 +43,13 @@ def require_user(request: Request):
     return session
 
 
+def require_admin(request: Request):
+    session = require_user(request)
+    if session["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Acceso de administrador requerido.")
+    return session
+
+
 def require_csrf(request: Request, session) -> None:
     token = request.headers.get("X-CSRF-Token")
     if not token or token != session["csrf_token"]:
@@ -146,7 +153,7 @@ def get_resource(resource_id: int, request: Request):
 
 @router.post("/resources")
 def create_resource(payload: ResourceInput, request: Request):
-    session = require_user(request)
+    session = require_admin(request)
     require_csrf(request, session)
     now = datetime.now(UTC).isoformat()
     with db_session() as db:
@@ -178,7 +185,7 @@ def create_resource(payload: ResourceInput, request: Request):
 
 @router.put("/resources/{resource_id}")
 def update_resource(resource_id: int, payload: ResourceInput, request: Request):
-    session = require_user(request)
+    session = require_admin(request)
     require_csrf(request, session)
     with db_session() as db:
         resource = db.get(Resource, resource_id)
@@ -226,7 +233,7 @@ def set_favorite(resource_id: int, payload: FavoriteInput, request: Request):
 
 @router.delete("/resources/{resource_id}")
 def delete_resource(resource_id: int, request: Request):
-    session = require_user(request)
+    session = require_admin(request)
     require_csrf(request, session)
     with db_session() as db:
         resource = db.get(Resource, resource_id)
@@ -252,7 +259,7 @@ def list_categories(request: Request):
 
 @router.post("/categories")
 def create_category(name: str, request: Request):
-    session = require_user(request)
+    session = require_admin(request)
     require_csrf(request, session)
     normalized = name.strip()
     if not normalized:
@@ -276,7 +283,7 @@ def create_category(name: str, request: Request):
 
 @router.delete("/categories/{category_id}")
 def delete_category(category_id: int, request: Request):
-    session = require_user(request)
+    session = require_admin(request)
     require_csrf(request, session)
     with db_session() as db:
         category = db.get(Category, category_id)
