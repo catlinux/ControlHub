@@ -93,18 +93,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["tag_id"], ["tags.id"]),
         sa.PrimaryKeyConstraint("resource_id", "tag_id"),
     )
-    op.create_table(
-        "secrets",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=False),
-        sa.Column("encrypted_value", sa.String(), nullable=False),
-        sa.Column("created_at", sa.String(), nullable=False),
-        sa.Column("updated_at", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
-    )
-    op.create_index("ix_secrets_name", "secrets", ["name"], unique=True)
+
 
 
 def downgrade() -> None:
