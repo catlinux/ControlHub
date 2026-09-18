@@ -9,7 +9,6 @@ from sqlmodel import SQLModel
 import app.models  # noqa: F401
 from app.db import resolved_database_url
 
-
 config = context.config
 config.set_main_option("sqlalchemy.url", resolved_database_url())
 
