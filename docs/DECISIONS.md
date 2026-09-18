@@ -122,3 +122,29 @@ Los secretos se cifran mediante Fernet de la biblioteca cryptography. La clave s
 **Estado:** Aceptada
 
 La administración de la V1 permite gestionar usuarios, roles, contraseñas, secretos y consultar auditoría. Las acciones administrativas siguen protegidas por autenticación, CSRF y rate limiting cuando corresponde.
+
+
+## DEC-021 — Portal privado separado de la administración
+
+**Estado:** Aceptada
+
+ControlHub tendrá dos experiencias dentro de la misma aplicación:
+
+- **Portal:** pantalla principal de uso diario para acceder rápidamente a recursos, favoritos, búsqueda, filtros y categorías.
+- **Administración:** área exclusiva para administradores, abierta desde el portal mediante un modal y organizada por secciones.
+
+El portal no se convierte en un backoffice. Las acciones de gestión de recursos y categorías quedan restringidas al rol administrador; los usuarios normales disponen de los accesos directos y de las funciones de uso permitidas.
+
+## DEC-022 — ControlHub no debe aparecer en buscadores
+
+**Estado:** Aceptada
+
+ControlHub es una aplicación privada y no un sitio público. La aplicación aplica varias capas para evitar su indexación:
+
+- meta robots con noindex, nofollow, noarchive, nosnippet;
+- cabecera HTTP X-Robots-Tag con las mismas directivas;
+- robots.txt que bloquea el rastreo;
+- ausencia de sitemap;
+- autenticación obligatoria para acceder al portal y a los recursos.
+
+robots.txt no se considera un mecanismo de seguridad. La protección real depende de la autenticación y autorización.
