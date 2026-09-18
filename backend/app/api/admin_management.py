@@ -31,6 +31,10 @@ class UserInput(BaseModel):
     role: str = Field(default="admin", pattern="^(admin|user)$")
 
 
+class PasswordInput(BaseModel):
+    password: str = Field(min_length=12, max_length=256)
+
+
 class RoleInput(BaseModel):
     role: str = Field(pattern="^(admin|user)$")
 
@@ -84,6 +88,20 @@ def update_user_role(user_id: int, payload: RoleInput, request: Request):
         db.commit()
         audit(session["user_id"], "user.role.changed")
         return {"id": user.id, "username": user.username, "role": user.role}
+
+
+@router.patch("/users/{user_id}/password")
+def update_user_password(user_id: int, payload: PasswordInput, request: Request):
+    session = require_admin(request)
+    with db_session() as db:
+        user = db.get(User, user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+        user.password_hash = _hasher.hash(payload.password)
+        db.add(user)
+        db.commit()
+        audit(session["user_id"], "user.password.changed")
+        return {"status": "ok"}
 
 
 @router.delete("/users/{user_id}")
