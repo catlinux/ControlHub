@@ -11,8 +11,8 @@ ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-rest
 - Repositorio: catlinux/ControlHub.
 - Rama de trabajo: feature/admin-restart.
 - PR #1: abierto y en estado draft; no debe fusionarse todavía.
-- La rama contiene autenticación, dashboard, recursos, administración y el bloque de seguridad/migraciones de la V1.
-- Los cambios de esta etapa deben pasar CI antes de desplegarse.
+- La rama contiene autenticación, portal, recursos, administración, seguridad y migraciones de la V1.
+- CI del bloque actual: frontend y backend correctos.
 
 ## Producción Debian
 
@@ -24,8 +24,8 @@ ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-rest
 - Configuración de producción: /etc/controlhub/controlhub.env.
 - Servicio: controlhub.service, habilitado y activo.
 - Sudoers permite exclusivamente /bin/systemctl restart controlhub.service.
-- Verificado en servidor: health local y health HTTPS devuelven {"status":"ok"}.
-- El servidor está operativo con la versión ya desplegada antes del bloque más reciente de seguridad y administración; el nuevo bloque requiere CI y despliegue controlado.
+- Verificado previamente en servidor: health local y health HTTPS devuelven {"status":"ok"}.
+- El bloque actual todavía requiere despliegue controlado en Debian.
 
 ## Funcionalidad implementada en la rama
 
@@ -35,17 +35,18 @@ ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-rest
 - Auditoría básica.
 - Reinicio administrativo seguro y limitado.
 - Persistencia mediante SQLModel.
-- Alembic como mecanismo único de evolución de esquema, con compatibilidad de arranque para la base existente.
+- Alembic como mecanismo único de evolución de esquema.
 - Entidades User, sesión, auditoría, Category, Tag, Resource y Secret.
-- CRUD de recursos.
+- Lectura de recursos para usuarios autenticados.
+- Gestión de recursos y categorías restringida a administradores.
 - Búsqueda por nombre, descripción, host y URL.
 - Filtros por categoría, favoritos y tags.
 - URLs y datos SSH.
 - Copia de comandos SSH.
-- Interfaz responsive con tarjetas.
-- Administración básica de usuarios, roles y contraseñas.
+- Portal responsive con tarjetas y agrupación por categoría.
+- Administración en modal con usuarios, secretos, auditoría y sistema.
 - Almacén de secretos cifrados separado del modelo Resource.
-- Consulta de auditoría desde administración.
+- Protección contra indexación mediante meta robots, X-Robots-Tag y robots.txt.
 
 ## Deuda técnica y seguridad
 
@@ -57,21 +58,9 @@ ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-rest
 
 ## Siguiente bloque de trabajo
 
-1. Ejecutar CI sobre el bloque actual y corregir cualquier fallo.
-2. Desplegar controladamente la rama en Debian.
+1. Desplegar controladamente la rama en Debian.
+2. Verificar la experiencia real del portal con los recursos existentes.
 3. Configurar y verificar CONTROLHUB_SECRET_KEY fuera del repositorio.
 4. Ejecutar pruebas de integración y navegador.
 5. Completar estados técnicos básicos y revisión final de la V1.
 6. Actualizar documentación y dejar el PR listo para revisión, sin fusionarlo automáticamente.
-
-
-## Portal y privacidad
-
-La experiencia principal de ControlHub se ha separado conceptualmente en:
-
-- **Portal:** accesos directos, recursos, favoritos, búsqueda, filtros y organización por categorías.
-- **Administración:** modal exclusivo para administradores con usuarios, secretos, auditoría y acciones de sistema.
-
-La gestión de recursos y categorías requiere rol administrador. El favorito continúa disponible para usuarios autenticados.
-
-ControlHub se considera una aplicación privada y no indexable. El backend añade X-Robots-Tag: noindex, nofollow, noarchive, nosnippet; el frontend declara la misma política mediante meta robots y /robots.txt bloquea el rastreo. No existe sitemap.
