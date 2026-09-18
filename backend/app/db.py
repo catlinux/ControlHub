@@ -3,7 +3,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from sqlmodel import Session, SQLModel, create_engine
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, inspect
+from sqlmodel import Session
 
 
 def database_url() -> str:
@@ -29,8 +32,17 @@ engine = create_engine(
 )
 
 
+def _alembic_config() -> Config:
+    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+    config.set_main_option("sqlalchemy.url", resolved_database_url())
+    return config
+
+
 def init_db() -> None:
-    SQLModel.metadata.create_all(engine)
+    inspector = inspect(engine)
+    if inspector.has_table("users") and not inspector.has_table("alembic_version"):
+        command.stamp(_alembic_config(), "0001_initial")
+    command.upgrade(_alembic_config(), "head")
 
 
 def db_session() -> Session:
