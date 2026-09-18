@@ -14,13 +14,14 @@ from app.secrets import SecretStoreError, encrypt
 router = APIRouter(prefix="/api/v1/secrets", tags=["secrets"])
 
 
-def require_admin(request: Request):
+def require_admin(request: Request, *, check_csrf: bool = True):
     session = get_session(request)
     if session is None or session["role"] != "admin":
         raise HTTPException(status_code=403, detail="Acceso de administrador requerido.")
-    csrf = request.headers.get("X-CSRF-Token")
-    if not csrf or csrf != session["csrf_token"]:
-        raise HTTPException(status_code=403, detail="CSRF inválido.")
+    if check_csrf:
+        csrf = request.headers.get("X-CSRF-Token")
+        if not csrf or csrf != session["csrf_token"]:
+            raise HTTPException(status_code=403, detail="CSRF inválido.")
     return session
 
 
@@ -42,7 +43,7 @@ def serialize(secret: Secret) -> dict:
 
 @router.get("")
 def list_secrets(request: Request):
-    require_admin(request)
+    require_admin(request, check_csrf=False)
     with db_session() as db:
         return [serialize(item) for item in db.exec(select(Secret).order_by(Secret.name)).all()]
 
