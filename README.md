@@ -12,6 +12,12 @@ La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, in
 
 La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
 
+## V1 definida
+
+La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, información SSH, autenticación, panel de administración integrado, gestión de secretos cifrados, auditoría e interfaz responsive/mobile-first.
+
+La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
+
 ## Objetivos
 
 ControlHub está diseñado para centralizar el acceso y la información de diferentes recursos digitales, entre ellos:
