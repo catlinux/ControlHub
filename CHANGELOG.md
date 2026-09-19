@@ -27,6 +27,13 @@ Todos los cambios relevantes de ControlHub se documentarán en este archivo.
 - Secciones administrativas para usuarios, secretos, auditoría y sistema.
 - Protección explícita contra indexación mediante meta robots, X-Robots-Tag y robots.txt.
 
+### Experiencia del portal
+
+- La portada se simplifica para funcionar como un directorio visual de accesos directos.
+- Se eliminan del uso cotidiano las tarjetas estadísticas y la presentación tipo backoffice.
+- Los recursos se muestran como iconos y nombres en una cuadrícula compacta, agrupada por categorías.
+- La administración queda fuera de la experiencia principal y se mantiene accesible únicamente para administradores mediante controles discretos.
+
 ### Cambiado
 
 - La persistencia de autenticación utiliza SQLModel.
