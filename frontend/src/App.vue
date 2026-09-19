@@ -30,7 +30,6 @@ const resources = ref<Resource[]>([]);
 const categories = ref<Category[]>([]);
 const tags = ref<Tag[]>([]);
 const tagFilter = ref("");
-const newCategory = ref("");
 const search = ref("");
 const favoriteOnly = ref(false);
 const categoryFilter = ref("");
@@ -231,41 +230,6 @@ async function saveResource() {
   showForm.value = false;
   message.value = editingId.value ? "Recurso actualizado." : "Recurso creado.";
   resetForm();
-  await loadData();
-}
-
-async function toggleFavorite(resource: Resource) {
-  const response = await fetch("/api/v1/resources/" + resource.id + "/favorite", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() },
-    body: JSON.stringify({ favorite: !resource.favorite }),
-  });
-
-  if (!response.ok) {
-    error.value = "No se pudo cambiar el favorito.";
-    return;
-  }
-
-  message.value = resource.favorite ? "Quitado de favoritos." : "Añadido a favoritos.";
-  await loadData();
-}
-
-async function createCategory() {
-  const name = newCategory.value.trim();
-  if (!name) return;
-
-  const response = await fetch("/api/v1/categories?name=" + encodeURIComponent(name), {
-    method: "POST",
-    headers: { "X-CSRF-Token": csrfToken() },
-  });
-
-  if (!response.ok) {
-    error.value = "No se pudo crear la categoría.";
-    return;
-  }
-
-  newCategory.value = "";
-  message.value = "Categoría creada.";
   await loadData();
 }
 
