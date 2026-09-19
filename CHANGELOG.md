@@ -29,6 +29,9 @@ Todos los cambios relevantes de ControlHub se documentarán en este archivo.
 
 ### Experiencia del portal
 
+- Las tarjetas web incorporan una mini previsualización del sitio directamente en el portal, sin depender de servicios externos de capturas.
+- El diseño aumenta la densidad visual y aprovecha mejor el ancho disponible mediante tarjetas más compactas y horizontales.
+
 - La portada se simplifica para funcionar como un directorio visual de accesos directos.
 - Se eliminan del uso cotidiano las tarjetas estadísticas y la presentación tipo backoffice.
 - Los recursos se muestran como iconos y nombres en una cuadrícula compacta, agrupada por categorías.
