@@ -56,17 +56,6 @@ const form = ref({
   tags: "",
 });
 
-const resourceTypeLabels: Record<string, string> = {
-  web: "Web",
-  server: "Servidor",
-  ssh: "SSH",
-  service: "Servicio",
-  database: "Base de datos",
-  git: "Git",
-  cloud: "Cloud",
-  other: "Otro",
-};
-
 const statusLabels: Record<string, string> = {
   unknown: "Desconocido",
   online: "Online",
@@ -75,8 +64,6 @@ const statusLabels: Record<string, string> = {
 };
 
 const totalResources = computed(() => resources.value.length);
-const onlineResources = computed(() => resources.value.filter((item) => item.status === "online").length);
-const favoriteResources = computed(() => resources.value.filter((item) => item.favorite).length);
 
 const groupedResources = computed(() => {
   const groups = new Map<number | null, { id: number | null; name: string; resources: Resource[] }>();
@@ -299,13 +286,6 @@ async function removeResource(resource: Resource) {
   await loadData();
 }
 
-async function copySsh(resource: Resource) {
-  const port = resource.port ? " -p " + resource.port : "";
-  const user = resource.username || "usuario";
-  await navigator.clipboard.writeText("ssh" + port + " " + user + "@" + resource.host);
-  message.value = "Comando SSH copiado.";
-}
-
 async function logout() {
   await fetch("/api/v1/auth/logout", {
     method: "POST",
@@ -331,14 +311,9 @@ onMounted(loadSession);
             <h1>Mis accesos</h1>
           </div>
         </div>
-
         <div v-if="authenticated" class="session">
-          <button v-if="role === 'admin'" class="admin-access" type="button" title="Nuevo recurso" aria-label="Crear recurso" @click="openCreate">
-            +
-          </button>
-          <button v-if="role === 'admin'" class="admin-access" type="button" title="Administración" aria-label="Abrir administración" @click="showAdmin = true">
-            ⚙
-          </button>
+          <button v-if="role === 'admin'" class="admin-access" type="button" title="Nuevo recurso" aria-label="Crear recurso" @click="openCreate">+</button>
+          <button v-if="role === 'admin'" class="admin-access" type="button" title="Administración" aria-label="Abrir administración" @click="showAdmin = true">⚙</button>
           <button class="ghost" type="button" @click="logout">Salir</button>
         </div>
       </header>
@@ -395,17 +370,9 @@ onMounted(loadSession);
               <h2>{{ group.name }}</h2>
               <span>{{ group.resources.length }}</span>
             </div>
-
             <div class="directory-grid">
               <article v-for="resource in group.resources" :key="resource.id" class="directory-card">
-                <a
-                  v-if="resource.url"
-                  class="directory-link"
-                  :href="resource.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  :aria-label="'Abrir ' + resource.name"
-                >
+                <a v-if="resource.url" class="directory-link" :href="resource.url" target="_blank" rel="noopener noreferrer" :aria-label="'Abrir ' + resource.name">
                   <div class="directory-icon" aria-hidden="true">{{ resource.icon || "◆" }}</div>
                   <div class="directory-name">{{ resource.name }}</div>
                   <div v-if="resource.description" class="directory-description">{{ resource.description }}</div>
@@ -425,8 +392,7 @@ onMounted(loadSession);
                     <span v-if="resource.favorite" class="directory-star" aria-label="Favorito">★</span>
                   </div>
                 </div>
-
-                <div class="directory-admin-actions" v-if="role === 'admin'">
+                <div v-if="role === 'admin'" class="directory-admin-actions">
                   <button type="button" @click="openEdit(resource)">Editar</button>
                   <button type="button" class="danger" @click="removeResource(resource)">Eliminar</button>
                 </div>
@@ -444,7 +410,6 @@ onMounted(loadSession);
 
         <p v-if="message" class="message">{{ message }}</p>
         <p v-if="error" class="error">{{ error }}</p>
-
         <AdminPanel v-if="showAdmin" @close="showAdmin = false" />
       </template>
     </section>
@@ -458,22 +423,13 @@ onMounted(loadSession);
           </div>
           <button class="icon-button" type="button" aria-label="Cerrar" @click="showForm = false">×</button>
         </header>
-
         <form class="form" @submit.prevent="saveResource">
           <label>Nombre<input v-model="form.name" required maxlength="200" /></label>
           <label>Descripción<textarea v-model="form.description" rows="2" /></label>
-
           <div class="form-grid">
             <label>Tipo
               <select v-model="form.resource_type">
-                <option value="web">Web</option>
-                <option value="server">Servidor</option>
-                <option value="ssh">SSH</option>
-                <option value="service">Servicio</option>
-                <option value="database">Base de datos</option>
-                <option value="git">Git</option>
-                <option value="cloud">Cloud</option>
-                <option value="other">Otro</option>
+                <option value="web">Web</option><option value="server">Servidor</option><option value="ssh">SSH</option><option value="service">Servicio</option><option value="database">Base de datos</option><option value="git">Git</option><option value="cloud">Cloud</option><option value="other">Otro</option>
               </select>
             </label>
             <label>Categoría
@@ -483,251 +439,23 @@ onMounted(loadSession);
               </select>
             </label>
           </div>
-
           <label>URL<input v-model="form.url" type="url" placeholder="https://…" /></label>
-
           <div class="form-grid">
             <label>Host/IP<input v-model="form.host" /></label>
             <label>Puerto<input v-model.number="form.port" type="number" min="1" max="65535" /></label>
           </div>
-
           <div class="form-grid">
             <label>Usuario<input v-model="form.username" /></label>
             <label>Icono<input v-model="form.icon" placeholder="🌐" /></label>
           </div>
-
           <label>Estado
             <select v-model="form.status">
-              <option value="unknown">Desconocido</option>
-              <option value="online">Online</option>
-              <option value="offline">Offline</option>
-              <option value="warning">Atención</option>
+              <option value="unknown">Desconocido</option><option value="online">Online</option><option value="offline">Offline</option><option value="warning">Atención</option>
             </select>
           </label>
-
           <label>Tags<input v-model="form.tags" placeholder="producción, linux, web" /></label>
           <label>Notas<textarea v-model="form.notes" rows="3" /></label>
           <label class="check"><input v-model="form.favorite" type="checkbox" /> Favorito</label>
-
-          <div class="modal-actions">
-            <button class="secondary" type="button" @click="showForm = false">Cancelar</button>
-            <button type="submit">Guardar recurso</button>
-          </div>
-        </form>
-      </section>
-    </div>
-  </main>
-</template>
-
-      <template v-else-if="!authenticated">
-        <section class="login-shell">
-          <div>
-            <p class="eyebrow">Acceso privado</p>
-            <h2>Tu centro de servicios</h2>
-            <p>Inicia sesión para acceder a tus recursos y accesos directos.</p>
-          </div>
-          <form class="form login-form" @submit.prevent="login">
-            <label>Usuario<input name="username" autocomplete="username" required /></label>
-            <label>Contraseña<input name="password" type="password" autocomplete="current-password" required /></label>
-            <button type="submit">Iniciar sesión</button>
-          </form>
-        </section>
-      </template>
-
-      <template v-else>
-        <section class="hero">
-          <div>
-            <p class="eyebrow">Portal</p>
-            <h2>Accesos directos</h2>
-            <p>Todo lo que necesitas, organizado en un único lugar.</p>
-          </div>
-          <button v-if="role === 'admin'" type="button" @click="openCreate">+ Nuevo recurso</button>
-        </section>
-
-        <section class="stats" aria-label="Resumen">
-          <article class="stat-card">
-            <span>Recursos</span>
-            <strong>{{ totalResources }}</strong>
-            <small>accesos disponibles</small>
-          </article>
-          <article class="stat-card">
-            <span>Online</span>
-            <strong>{{ onlineResources }}</strong>
-            <small>estado registrado</small>
-          </article>
-          <article class="stat-card">
-            <span>Favoritos</span>
-            <strong>{{ favoriteResources }}</strong>
-            <small>accesos destacados</small>
-          </article>
-          <article class="stat-card">
-            <span>Categorías</span>
-            <strong>{{ categories.length }}</strong>
-            <small>grupos organizados</small>
-          </article>
-        </section>
-
-        <section class="toolbar portal-toolbar">
-          <label class="search-field">
-            <span aria-hidden="true">⌕</span>
-            <input v-model="search" type="search" placeholder="Buscar recursos…" @input="loadData" />
-          </label>
-          <select v-model="categoryFilter" aria-label="Filtrar por categoría" @change="loadData">
-            <option value="">Todas las categorías</option>
-            <option v-for="category in categories" :key="category.id" :value="category.id">
-              {{ category.name }}
-            </option>
-          </select>
-          <select v-model="tagFilter" aria-label="Filtrar por tag" @change="loadData">
-            <option value="">Todos los tags</option>
-            <option v-for="tag in tags" :key="tag.id" :value="tag.name">{{ tag.name }}</option>
-          </select>
-          <label class="favorite-filter">
-            <input v-model="favoriteOnly" type="checkbox" @change="loadData" />
-            <span>★ Favoritos</span>
-          </label>
-          <template v-if="role === 'admin'">
-            <div class="category-create">
-              <input v-model="newCategory" placeholder="Nueva categoría" maxlength="100" @keyup.enter="createCategory" />
-              <button class="secondary" type="button" @click="createCategory">Crear</button>
-            </div>
-          </template>
-        </section>
-
-        <section v-if="groupedResources.length" class="resource-sections">
-          <section v-for="group in groupedResources" :key="group.id ?? 'uncategorized'" class="resource-section">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">Categoría</p>
-                <h2>{{ group.name }}</h2>
-              </div>
-              <span>{{ group.resources.length }} {{ group.resources.length === 1 ? "recurso" : "recursos" }}</span>
-            </div>
-
-            <div class="resource-grid">
-              <article v-for="resource in group.resources" :key="resource.id" class="resource-card">
-                <div class="card-head">
-                  <div class="resource-title">
-                    <div class="resource-icon" aria-hidden="true">{{ resource.icon || "◆" }}</div>
-                    <div>
-                      <span class="type">{{ resourceTypeLabels[resource.resource_type] || resource.resource_type }}</span>
-                      <h3>{{ resource.name }}</h3>
-                    </div>
-                  </div>
-                  <div class="card-badges">
-                    <button
-                      class="favorite-button"
-                      type="button"
-                      :aria-label="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
-                      :title="resource.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
-                      @click="toggleFavorite(resource)"
-                    >
-                      {{ resource.favorite ? "★" : "☆" }}
-                    </button>
-                    <span :class="['status', resource.status]">
-                      <span class="status-dot" aria-hidden="true"></span>
-                      {{ statusLabels[resource.status] || resource.status }}
-                    </span>
-                  </div>
-                </div>
-
-                <p v-if="resource.description" class="resource-description">{{ resource.description }}</p>
-
-                <p v-if="resource.host" class="connection">
-                  {{ resource.username ? resource.username + "@" : "" }}{{ resource.host }}{{ resource.port ? ":" + resource.port : "" }}
-                </p>
-
-                <div v-if="resource.tags.length" class="tags">
-                  <span v-for="tag in resource.tags" :key="tag">{{ tag }}</span>
-                </div>
-
-                <div class="card-actions">
-                  <a v-if="resource.url" class="primary-link" :href="resource.url" target="_blank" rel="noopener noreferrer">Abrir</a>
-                  <button v-if="resource.host" class="secondary" type="button" @click="copySsh(resource)">Copiar SSH</button>
-                  <template v-if="role === 'admin'">
-                    <button class="secondary" type="button" @click="openEdit(resource)">Editar</button>
-                    <button class="danger" type="button" @click="removeResource(resource)">Eliminar</button>
-                  </template>
-                </div>
-              </article>
-            </div>
-          </section>
-        </section>
-
-        <div v-else class="empty">
-          <div class="empty-icon" aria-hidden="true">◆</div>
-          <h2>No hay recursos todavía</h2>
-          <p>Cuando añadas tus servicios, aparecerán aquí organizados por categorías.</p>
-          <button v-if="role === 'admin'" type="button" @click="openCreate">Crear primer recurso</button>
-        </div>
-
-        <p v-if="message" class="message">{{ message }}</p>
-        <p v-if="error" class="error">{{ error }}</p>
-
-        <AdminPanel v-if="showAdmin" @close="showAdmin = false" />
-      </template>
-    </section>
-
-    <div v-if="showForm" class="modal-backdrop" @click.self="showForm = false">
-      <section class="modal resource-modal" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
-        <header class="modal-head">
-          <div>
-            <p class="eyebrow">Administración de recursos</p>
-            <h2 id="resource-modal-title">{{ editingId ? "Editar recurso" : "Nuevo recurso" }}</h2>
-          </div>
-          <button class="icon-button" type="button" aria-label="Cerrar" @click="showForm = false">×</button>
-        </header>
-
-        <form class="form" @submit.prevent="saveResource">
-          <label>Nombre<input v-model="form.name" required maxlength="200" /></label>
-          <label>Descripción<textarea v-model="form.description" rows="2" /></label>
-
-          <div class="form-grid">
-            <label>Tipo
-              <select v-model="form.resource_type">
-                <option value="web">Web</option>
-                <option value="server">Servidor</option>
-                <option value="ssh">SSH</option>
-                <option value="service">Servicio</option>
-                <option value="database">Base de datos</option>
-                <option value="git">Git</option>
-                <option value="cloud">Cloud</option>
-                <option value="other">Otro</option>
-              </select>
-            </label>
-            <label>Categoría
-              <select v-model="form.category_id">
-                <option :value="null">Sin categoría</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-              </select>
-            </label>
-          </div>
-
-          <label>URL<input v-model="form.url" type="url" placeholder="https://…" /></label>
-
-          <div class="form-grid">
-            <label>Host/IP<input v-model="form.host" /></label>
-            <label>Puerto<input v-model.number="form.port" type="number" min="1" max="65535" /></label>
-          </div>
-
-          <div class="form-grid">
-            <label>Usuario<input v-model="form.username" /></label>
-            <label>Icono<input v-model="form.icon" placeholder="🌐" /></label>
-          </div>
-
-          <label>Estado
-            <select v-model="form.status">
-              <option value="unknown">Desconocido</option>
-              <option value="online">Online</option>
-              <option value="offline">Offline</option>
-              <option value="warning">Atención</option>
-            </select>
-          </label>
-
-          <label>Tags<input v-model="form.tags" placeholder="producción, linux, web" /></label>
-          <label>Notas<textarea v-model="form.notes" rows="3" /></label>
-          <label class="check"><input v-model="form.favorite" type="checkbox" /> Favorito</label>
-
           <div class="modal-actions">
             <button class="secondary" type="button" @click="showForm = false">Cancelar</button>
             <button type="submit">Guardar recurso</button>
