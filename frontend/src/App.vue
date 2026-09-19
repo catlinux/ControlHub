@@ -333,6 +333,9 @@ onMounted(loadSession);
         </div>
 
         <div v-if="authenticated" class="session">
+          <button v-if="role === 'admin'" class="admin-access" type="button" title="Nuevo recurso" aria-label="Crear recurso" @click="openCreate">
+            +
+          </button>
           <button v-if="role === 'admin'" class="admin-access" type="button" title="Administración" aria-label="Abrir administración" @click="showAdmin = true">
             ⚙
           </button>
