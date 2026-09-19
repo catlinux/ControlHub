@@ -36,7 +36,7 @@ const categoryFilter = ref("");
 const message = ref("");
 const error = ref("");
 const showForm = ref(false);
-const showAdmin = ref(false);
+const showAdmin = ref(false);\nconst previewErrors = ref<Record<number, boolean>>({});
 const editingId = ref<number | null>(null);
 
 const form = ref({
@@ -148,6 +148,10 @@ async function loadSession() {
       error.value = loadError instanceof Error ? loadError.message : "Error de carga.";
     }
   }
+}
+
+function markPreviewError(resourceId: number) {
+  previewErrors.value = { ...previewErrors.value, [resourceId]: true };
 }
 
 function openCreate() {
@@ -337,28 +341,48 @@ onMounted(loadSession);
             <div class="directory-grid">
               <article v-for="resource in group.resources" :key="resource.id" class="directory-card">
                 <a v-if="resource.url" class="directory-link" :href="resource.url" target="_blank" rel="noopener noreferrer" :aria-label="'Abrir ' + resource.name">
-                  <div class="directory-icon" aria-hidden="true">{{ resource.icon || "◆" }}</div>
-                  <div class="directory-name">{{ resource.name }}</div>
-                  <div v-if="resource.description" class="directory-description">{{ resource.description }}</div>
-                  <div class="directory-meta">
-                    <span v-if="resource.status !== 'unknown'" :class="['directory-status', resource.status]">
-                      <span class="status-dot" aria-hidden="true"></span>{{ statusLabels[resource.status] || resource.status }}
-                    </span>
-                    <span v-if="resource.favorite" class="directory-star" aria-label="Favorito">★</span>
+                  <div class="directory-preview">
+                    <iframe
+                      v-if="resource.resource_type === 'web' && !previewErrors[resource.id]"
+                      :src="resource.url"
+                      :title="'Vista previa de ' + resource.name"
+                      loading="lazy"
+                      referrerpolicy="no-referrer"
+                      @error="markPreviewError(resource.id)"
+                    ></iframe>
+                    <div v-if="resource.resource_type !== 'web' || previewErrors[resource.id]" class="directory-preview-fallback" aria-hidden="true">
+                      <span class="directory-icon">{{ resource.icon || "◆" }}</span>
+                    </div>
+                    <span v-if="resource.favorite" class="directory-preview-star" aria-label="Favorito">★</span>
+                  </div>
+                  <div class="directory-card-body">
+                    <div class="directory-name">{{ resource.name }}</div>
+                    <div class="directory-url">{{ resource.url }}</div>
+                    <div class="directory-meta">
+                      <span v-if="resource.status !== 'unknown'" :class="['directory-status', resource.status]">
+                        <span class="status-dot" aria-hidden="true"></span>{{ statusLabels[resource.status] || resource.status }}
+                      </span>
+                    </div>
                   </div>
                 </a>
                 <div v-else class="directory-link directory-link-static">
-                  <div class="directory-icon" aria-hidden="true">{{ resource.icon || "◆" }}</div>
-                  <div class="directory-name">{{ resource.name }}</div>
-                  <div v-if="resource.description" class="directory-description">{{ resource.description }}</div>
-                  <div class="directory-meta">
-                    <span v-if="resource.host" class="directory-host">{{ resource.host }}{{ resource.port ? ":" + resource.port : "" }}</span>
-                    <span v-if="resource.favorite" class="directory-star" aria-label="Favorito">★</span>
+                  <div class="directory-preview">
+                    <div class="directory-preview-fallback" aria-hidden="true">
+                      <span class="directory-icon">{{ resource.icon || "◆" }}</span>
+                    </div>
+                    <span v-if="resource.favorite" class="directory-preview-star" aria-label="Favorito">★</span>
+                  </div>
+                  <div class="directory-card-body">
+                    <div class="directory-name">{{ resource.name }}</div>
+                    <div v-if="resource.description" class="directory-description">{{ resource.description }}</div>
+                    <div class="directory-meta">
+                      <span v-if="resource.host" class="directory-host">{{ resource.host }}{{ resource.port ? ":" + resource.port : "" }}</span>
+                    </div>
                   </div>
                 </div>
                 <div v-if="role === 'admin'" class="directory-admin-actions">
-                  <button type="button" @click="openEdit(resource)">Editar</button>
-                  <button type="button" class="danger" @click="removeResource(resource)">Eliminar</button>
+                  <button type="button" @click.prevent="openEdit(resource)">Editar</button>
+                  <button type="button" class="danger" @click.prevent="removeResource(resource)">Eliminar</button>
                 </div>
               </article>
             </div>
