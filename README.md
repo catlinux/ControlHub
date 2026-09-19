@@ -4,66 +4,59 @@ Centro de control personal para organizar, consultar y gestionar recursos de inf
 
 ## Estado del proyecto
 
-ControlHub se encuentra en fase de arquitectura técnica consolidada, antes de la implementación funcional.
+ControlHub dispone de una base funcional de la V1 con autenticación, dashboard, recursos, administración, auditoría, migraciones y almacenamiento cifrado de secretos. La rama de trabajo todavía no se ha fusionado.
 
 ## V1
 
-La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, información SSH, autenticación, panel de administración integrado, gestión de secretos cifrados, auditoría e interfaz responsive/mobile-first. La arquitectura quedará preparada para internacionalización futura.
+La V1 incluye:
 
-La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
+- dashboard;
+- recursos y tarjetas;
+- categorías y tags;
+- búsqueda y filtros;
+- favoritos;
+- URLs;
+- información SSH y copia de comandos;
+- autenticación;
+- panel de administración;
+- usuarios y roles básicos;
+- secretos cifrados separados de Resource;
+- auditoría;
+- rate limiting básico;
+- interfaz responsive/mobile-first.
 
-## V1 definida
+Los secretos se mantienen separados del modelo normal de recursos. No se ejecutan comandos remotos arbitrarios desde la interfaz.
 
-La V1 incluirá dashboard, recursos, categorías, tags, favoritos, búsqueda, información SSH, autenticación, panel de administración integrado, gestión de secretos cifrados, auditoría e interfaz responsive/mobile-first.
+## Producción
 
-La V1 no ejecutará comandos remotos arbitrarios ni incorporará monitorización avanzada sin una necesidad concreta.
+Apache HTTPS
+    |
+Uvicorn/systemd
+    |
+FastAPI
+    |
+SQLite + Alembic
 
-## Objetivos
+El backend escucha únicamente en loopback. El puerto interno actual es 8008.
 
-ControlHub está diseñado para centralizar el acceso y la información de diferentes recursos digitales, entre ellos:
+La configuración de producción se mantiene en /etc/controlhub/controlhub.env y nunca se introduce en Git.
 
-- Sitios web y aplicaciones web
-- Servidores y VPS
-- Conexiones SSH
-- Servicios
-- Repositorios Git
-- Bases de datos
-- Herramientas de administración
-- Servicios cloud
-- Sistemas de monitorización
-- Backups
-- Documentación
-
-La aplicación debe mantener una arquitectura sencilla y mantenible, pero preparada para incorporar nuevos tipos de recursos e integraciones en el futuro.
-
-## Principios
-
-1. Simplicidad
-2. Seguridad
-3. Fiabilidad
-4. Mantenibilidad
-5. Arquitectura extensible
-6. Buena experiencia de usuario, especialmente en dispositivos móviles
-7. Evitar dependencias innecesarias
-8. No implementar funcionalidades únicamente porque sean posibles
-9. Evitar duplicar servicios o componentes sin una razón clara
-10. Documentar las decisiones importantes
-
-## Metodología
-
-Los cambios importantes seguirán este flujo:
-
-**INSPECT → PLAN → EXECUTE → VERIFY → DOCUMENT → BACKUP**
+La documentación de desarrollo y operación se encuentra en docs/DEVELOPMENT.md.
 
 ## Documentación
 
-- [Arquitectura](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Desarrollo](docs/DEVELOPMENT.md)
-- [Estado del proyecto](docs/PROJECT-STATE.md)
-- [Registro de decisiones](docs/DECISIONS.md)
-- [Changelog](CHANGELOG.md)
+- docs/ARCHITECTURE.md
+- docs/ROADMAP.md
+- docs/DEVELOPMENT.md
+- docs/PROJECT-STATE.md
+- docs/DECISIONS.md
+- CHANGELOG.md
 
-## Licencia
 
-ControlHub se distribuirá bajo la licencia MIT, salvo que una decisión posterior del proyecto establezca lo contrario.
+## Privacidad e indexación
+
+ControlHub es un centro de control privado y no un sitio público. La aplicación requiere autenticación para acceder al portal y a los recursos y aplica noindex mediante meta robots y cabecera X-Robots-Tag. También publica un robots.txt que bloquea el rastreo y no mantiene sitemap.
+
+La administración está separada visualmente del portal y sólo está disponible para usuarios con rol administrador. Los usuarios normales utilizan ControlHub como portal de acceso a los recursos autorizados.
+
+La no indexación no sustituye a la autenticación, autorización ni al resto de controles de seguridad.

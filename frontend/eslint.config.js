@@ -1,5 +1,7 @@
 import js from "@eslint/js";
 import vue from "eslint-plugin-vue";
+import tsParser from "@typescript-eslint/parser";
+import globals from "globals";
 
 export default [
   {
@@ -7,4 +9,13 @@ export default [
   },
   js.configs.recommended,
   ...vue.configs["flat/essential"],
+  {
+    files: ["**/*.vue"],
+    languageOptions: {
+      globals: globals.browser,
+      parserOptions: {
+        parser: tsParser,
+      },
+    },
+  },
 ];

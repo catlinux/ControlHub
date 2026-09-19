@@ -2,133 +2,121 @@
 
 ## 1. Objetivo
 
-La arquitectura de ControlHub debe proporcionar una base sencilla para la primera versión y, al mismo tiempo, permitir la incorporación progresiva de nuevos tipos de recursos, integraciones y funciones de supervisión.
+La arquitectura de ControlHub proporciona una base sencilla para un centro de control personal extensible, evitando microservicios y complejidad distribuida mientras no exista una necesidad real.
 
 ## 2. Enfoque
 
-La V1 seguirá inicialmente un enfoque de **monolito modular**, evitando microservicios y complejidad distribuida mientras no exista una necesidad real que los justifique.
+La V1 utiliza un monolito modular:
 
-La separación lógica deberá permitir evolucionar posteriormente componentes concretos sin tener que rediseñar toda la aplicación.
+Apache HTTPS
+    |
+Uvicorn / systemd
+    |
+FastAPI
+    |-- autenticación/autorización
+    |-- recursos
+    |-- administración
+    |-- secretos
+    |
+SQLModel
+    |
+SQLite + Alembic
 
-## 3. Capas conceptuales
+## 3. Stack
 
-```text
-┌─────────────────────────────┐
-│          Frontend           │
-├─────────────────────────────┤
-│             API             │
-├─────────────────────────────┤
-│       Lógica de negocio     │
-├─────────────────────────────┤
-│ Persistencia / Base de datos│
-└─────────────────────────────┘
+- Backend: Python + FastAPI + SQLModel + Uvicorn.
+- Migraciones: Alembic.
+- Frontend: Vue 3 + TypeScript.
+- Persistencia V1: SQLite.
+- API REST versionada bajo /api/v1.
+- Producción: Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
+- V1 sin Docker.
 
-        Integraciones externas
-                 │
-                 ▼
-        ┌─────────────────┐
-        │  Integrations   │
-        └─────────────────┘
-```
+## 4. Estructura
 
-## 4. Stack tecnológico
+- app/api: endpoints HTTP.
+- app/auth: autenticación y sesiones.
+- app/models: modelos persistentes.
+- app/security: controles de seguridad.
+- app/secrets.py: cifrado mediante Fernet.
+- app/db.py: motor, sesiones y arranque de migraciones.
+- app/services: lógica de negocio que se vaya extrayendo.
+- frontend: interfaz Vue.
+- docs: documentación y decisiones.
+- migrations: scripts de Alembic para evolución del esquema.
 
-- Backend: Python + FastAPI + SQLModel + Alembic + Uvicorn
-- Frontend: Vue 3 + TypeScript + Tailwind CSS + Pinia + Vue I18n
-- Base de datos V1: SQLite
-- API REST versionada bajo `/api/v1`
-- Autenticación mediante sesiones server-side y cookies seguras
-- Contraseñas con Argon2id
-- Producción: Apache HTTPS → Uvicorn/systemd → FastAPI → SQLite
-- V1 sin Docker
+## 5. Modelo de recursos
 
-## 5. Estructura del repositorio
+Resource es la entidad central de la V1.
 
-Monorepo con frontend, backend, documentación, tests y scripts. La implementación funcional todavía no ha comenzado.
+Incluye:
 
-## 6. API y seguridad
+- identidad: nombre, descripción y tipo;
+- organización: categoría, tags y favorito;
+- conexión: URL, host, puerto y usuario;
+- presentación: icono y estado;
+- notas y metadatos específicos.
 
-El frontend nunca accede directamente a SQLite. FastAPI escuchará únicamente en loopback en producción. La API aplicará validación de entrada, CORS restringido, CSRF, límites de petición, rate limiting en endpoints sensibles y respuestas de error coherentes.
+Relaciones:
 
-## 7. Autenticación y autorización
+Category 1 -> N Resource
+Resource N -> N Tag
 
-Se utilizarán sesiones server-side, cookies HttpOnly/Secure/SameSite y el modelo `User → Role → Permission`. La V1 tendrá inicialmente un rol administrativo, sin hardcodear la autorización.
+Las contraseñas, tokens, claves privadas y otros secretos no forman parte de Resource.
 
-## 8. Panel de administración
+## 6. Secretos
 
-La administración forma parte de la V1 e incluirá recursos, categorías, tags, usuarios, roles/permisos, secretos, auditoría y configuración. Gestionar un recurso no implica ejecutar el servicio asociado.
+Secret es una entidad separada que almacena únicamente un valor cifrado.
 
-## 9. Auditoría y logs
+- Cifrado: Fernet de cryptography.
+- Clave: CONTROLHUB_SECRET_KEY, fuera del repositorio y de la base de datos.
+- La API de listado devuelve sólo metadatos.
+- Las operaciones están limitadas a administración.
+- No se implementa criptografía propia.
 
-Se separarán los logs operativos de la auditoría. Ninguno almacenará contraseñas, tokens, claves privadas ni contenido de secretos.
+## 7. API
 
-## 10. Testing y CI
+Los recursos exponen inicialmente:
 
-Backend con pytest; frontend con Vitest; flujos críticos con Playwright. GitHub Actions ejecutará lint, tests, build y comprobaciones de calidad.
+- GET /api/v1/resources
+- GET /api/v1/resources/{id}
+- POST /api/v1/resources
+- PUT /api/v1/resources/{id}
+- PATCH /api/v1/resources/{id}/favorite
+- DELETE /api/v1/resources/{id}
+- GET /api/v1/categories
+- POST /api/v1/categories
+- DELETE /api/v1/categories/{id}
+- GET /api/v1/tags
 
-## 11. Evolución
+Administración:
 
-La arquitectura queda preparada para PostgreSQL, monitorización, integraciones externas y acciones remotas controladas cuando exista una necesidad real.
+- GET/POST /api/v1/admin/users
+- PATCH /api/v1/admin/users/{id}/role
+- PATCH /api/v1/admin/users/{id}/password
+- DELETE /api/v1/admin/users/{id}
+- GET /api/v1/admin/audit
+- POST /api/v1/admin/restart
 
-## 4. Recurso como entidad central
+Secretos:
 
-El concepto principal de ControlHub será `Resource`.
+- GET/POST /api/v1/secrets
+- PUT/DELETE /api/v1/secrets/{id}
 
-Un recurso podrá representar diferentes clases de elementos digitales sin obligar a crear un modelo completamente independiente para cada tipo.
+La búsqueda se realiza mediante filtros de API. El frontend nunca accede directamente a SQLite.
 
-Conceptualmente:
+## 8. Seguridad
 
-```text
-Resource
-├── identity
-│   ├── name
-│   ├── description
-│   └── type
-├── organization
-│   ├── category
-│   ├── tags
-│   └── favorite
-├── connection
-│   ├── url
-│   ├── host
-│   ├── port
-│   └── username
-├── presentation
-│   ├── icon
-│   └── status
-└── metadata
-    └── type-specific data
-```
+La autenticación utiliza sesiones server-side, cookies HttpOnly/Secure/SameSite y Argon2id. Las mutaciones requieren CSRF.
 
-## 5. Secretos
+Los endpoints sensibles incorporan rate limiting en memoria, adecuado al despliegue V1 de un único proceso.
 
-Las credenciales y secretos no deben almacenarse como texto plano dentro del modelo normal de recursos.
+La acción administrativa de reinicio está limitada a una orden exacta de systemd mediante sudoers de mínimo privilegio. ControlHub no ejecuta comandos remotos arbitrarios.
 
-El modelo de recursos podrá contener referencias o información no sensible necesaria para identificar o conectar con un recurso, mientras que contraseñas, tokens, claves privadas y otros secretos deberán gestionarse mediante un mecanismo separado.
+## 9. Testing
 
-La solución concreta de almacenamiento de secretos se definirá durante el diseño de seguridad.
+Backend: pytest + Ruff. Frontend: Vitest + ESLint + build. Los flujos de navegador se cubrirán progresivamente con Playwright.
 
-## 6. Seguridad
+## 10. Internacionalización y accesibilidad
 
-La seguridad es un requisito arquitectónico desde la V1.
-
-Se deberán considerar como mínimo:
-
-- autenticación;
-- autorización;
-- gestión segura de sesiones;
-- protección frente a CSRF y XSS cuando corresponda;
-- validación de entradas;
-- gestión de secretos;
-- HTTPS en producción;
-- control de acceso;
-- logs;
-- mínimo privilegio.
-
-ControlHub no deberá ejecutar comandos remotos arbitrarios simplemente como consecuencia de una acción de interfaz.
-
-## 7. Internacionalización
-
-La aplicación comenzará en castellano, pero la arquitectura deberá evitar que los textos estén acoplados de forma irreversible al código.
-
-La internacionalización se preparará desde el principio para permitir incorporar otros idiomas posteriormente.
+El software empieza en castellano. La arquitectura evita acoplar de forma irreversible los textos a la lógica para permitir i18n futura. La interfaz debe mantener controles accesibles y usable en móvil.
