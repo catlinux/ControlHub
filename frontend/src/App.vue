@@ -36,7 +36,8 @@ const categoryFilter = ref("");
 const message = ref("");
 const error = ref("");
 const showForm = ref(false);
-const showAdmin = ref(false);\nconst previewErrors = ref<Record<number, boolean>>({});
+const showAdmin = ref(false);
+const previewErrors = ref<Record<number, boolean>>({});
 const editingId = ref<number | null>(null);
 
 const form = ref({
