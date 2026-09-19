@@ -11,6 +11,7 @@ dependencies = [
   "argon2-cffi",
   "cryptography",
   "pydantic-settings",
+  "python-multipart",
 ]
 
 [project.optional-dependencies]
@@ -27,3 +28,7 @@ target-version = "py312"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+

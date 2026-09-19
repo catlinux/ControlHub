@@ -4,49 +4,63 @@
 
 ## Estado general
 
-ControlHub está en fase de arquitectura técnica consolidada, antes de la implementación funcional.
+ControlHub dispone de una base funcional de la V1 en la rama `feature/admin-restart`. El despliegue existente en Debian está operativo con Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
 
 ## Repositorio
 
-- Repositorio GitHub creado.
-- Visibilidad: pública.
-- Organización/propietario: Catlinux.
-- Se ha creado el esqueleto inicial de frontend, backend, tests, scripts y CI.
-- La implementación funcional de V1 todavía no ha comenzado.
+- Repositorio: catlinux/ControlHub.
+- Rama de trabajo: feature/admin-restart.
+- PR #1: abierto y en estado draft; no debe fusionarse todavía.
+- La rama contiene autenticación, portal, recursos, administración, seguridad y migraciones de la V1.
+- CI del bloque actual: frontend y backend correctos.
 
-## Decisiones confirmadas
+## Producción Debian
 
-- El proyecto se denomina ControlHub.
-- La documentación y las descripciones del proyecto se redactarán en castellano.
-- El software comenzará en castellano.
-- La arquitectura se preparará para internacionalización futura.
-- La V1 priorizará simplicidad, seguridad, fiabilidad y mantenibilidad.
-- Se evitará la complejidad innecesaria.
-- Las credenciales y secretos estarán separados del modelo normal de recursos.
-- El proyecto utilizará Git desde el principio.
-- Se seguirá la metodología INSPECT → PLAN → EXECUTE → VERIFY → DOCUMENT → BACKUP.
+- Usuario de servicio: stark.
+- Aplicación: /opt/controlhub.
+- Backend: 127.0.0.1:8008.
+- Apache publica https://hub.warcrafted.com.
+- Certificado HTTPS operativo y renovación automática configurada.
+- Configuración de producción: /etc/controlhub/controlhub.env.
+- Servicio: controlhub.service, habilitado y activo.
+- Sudoers permite exclusivamente /bin/systemctl restart controlhub.service.
+- Verificado previamente en servidor: health local y health HTTPS devuelven {"status":"ok"}.
+- El bloque actual todavía requiere despliegue controlado en Debian.
 
-## Decisiones técnicas consolidadas
+## Funcionalidad implementada en la rama
 
-- Monolito modular y monorepo.
-- Backend Python + FastAPI.
-- Frontend Vue 3 + TypeScript + Tailwind CSS.
-- SQLite + SQLModel + Alembic.
-- REST /api/v1.
-- Sesiones server-side + Argon2id.
-- Secretos separados y cifrados.
-- User → Role → Permission.
-- Panel de administración integrado en V1.
-- Auditoría y logs separados.
-- Apache + Uvicorn/systemd + FastAPI en producción.
-- Sin Docker en V1.
-- pytest, Vitest, Playwright y GitHub Actions.
+- Autenticación con sesiones server-side y Argon2id.
+- Protección CSRF.
+- Rate limiting básico para login y acciones administrativas.
+- Auditoría básica.
+- Reinicio administrativo seguro y limitado.
+- Persistencia mediante SQLModel.
+- Alembic como mecanismo único de evolución de esquema.
+- Entidades User, sesión, auditoría, Category, Tag, Resource y Secret.
+- Lectura de recursos para usuarios autenticados.
+- Gestión de recursos y categorías restringida a administradores.
+- Búsqueda por nombre, descripción, host y URL.
+- Filtros por categoría, favoritos y tags.
+- URLs y datos SSH.
+- Copia de comandos SSH.
+- Portal responsive con tarjetas y agrupación por categoría.
+- Administración en modal con usuarios, secretos, auditoría y sistema.
+- Almacén de secretos cifrados separado del modelo Resource.
+- Protección contra indexación mediante meta robots, X-Robots-Tag y robots.txt.
 
-## Pendiente de decidir
+## Deuda técnica y seguridad
 
-- Diseño detallado del modelo de datos, antes de crear la migración inicial.
-- Detalle final de la UI y navegación, validado durante el prototipo.
+- CONTROLHUB_SECRET_KEY debe configurarse en producción antes de utilizar secretos.
+- Los estados de recursos todavía son informativos; no hay monitorización activa.
+- Deben añadirse pruebas de navegador y una verificación E2E del despliegue.
+- Debe completarse la revisión final de accesibilidad y contratos OpenAPI.
+- La política de frontend/package-lock.json continúa siendo no versionarlo por ahora.
 
-## Próximo paso
+## Siguiente bloque de trabajo
 
-Implementar la base de aplicación: configuración, persistencia SQLModel/Alembic y primer modelo de datos, manteniendo el alcance estrictamente dentro de la V1.
+1. Desplegar controladamente la rama en Debian.
+2. Verificar la experiencia real del portal con los recursos existentes.
+3. Configurar y verificar CONTROLHUB_SECRET_KEY fuera del repositorio.
+4. Ejecutar pruebas de integración y navegador.
+5. Completar estados técnicos básicos y revisión final de la V1.
+6. Actualizar documentación y dejar el PR listo para revisión, sin fusionarlo automáticamente.

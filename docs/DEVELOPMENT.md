@@ -2,49 +2,104 @@
 
 ## Estado actual
 
-El proyecto se encuentra en fase de arquitectura técnica consolidada. El stack de V1 ya está definido, pero la implementación funcional todavía no ha comenzado.
+ControlHub dispone de autenticación, sesiones server-side, panel responsive, recursos, categorías, tags, administración básica, auditoría y almacenamiento cifrado de secretos separado del modelo Resource.
 
-## Principios de trabajo
+## Producción en Debian
 
-Los cambios importantes deben seguir:
+Arquitectura:
 
-1. Inspect
-2. Plan
-3. Execute
-4. Verify
-5. Document
-6. Backup
+Apache HTTPS -> Uvicorn/systemd -> FastAPI -> SQLite.
 
-## Git
+El backend escucha únicamente en loopback y usa el puerto interno 8008.
 
-El proyecto utilizará Git desde el principio.
+### Configuración
 
-Se mantendrá:
+La configuración de producción se mantiene fuera del repositorio:
 
-- historial comprensible;
-- commits pequeños y coherentes;
-- README actualizado;
-- CHANGELOG;
-- documentación de arquitectura;
-- roadmap.
+/etc/controlhub/controlhub.env
 
-No se realizarán commits automáticos sin revisar previamente los cambios.
+Debe contener como mínimo:
+
+CONTROLHUB_HOST=127.0.0.1
+CONTROLHUB_PORT=8008
+DATABASE_URL=sqlite:///data/controlhub.db
+CONTROLHUB_ADMIN_USERNAME=<usuario>
+CONTROLHUB_ADMIN_PASSWORD=<contraseña-inicial>
+CONTROLHUB_SECRET_KEY=<clave-Fernet-generada-fuera-del-repositorio>
+
+La clave Fernet debe mantenerse fuera de Git y fuera de la base de datos. No debe compartirse en incidencias, logs ni documentación pública.
+
+### Base de datos
+
+Alembic es el mecanismo único de evolución del esquema.
+
+La aplicación ejecuta las migraciones al iniciar. Si encuentra una base existente sin tabla alembic_version, la marca como compatible con la migración inicial y aplica las migraciones posteriores.
+
+Para nuevas instalaciones también puede ejecutarse explícitamente:
+
+cd backend
+.venv/bin/alembic upgrade head
+
+### Servicio
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now controlhub.service
+sudo systemctl status controlhub.service
+
+Verificación:
+
+curl -fsS http://127.0.0.1:8008/api/v1/health
+curl -fsS https://hub.warcrafted.com/api/v1/health
+
+### Reinicio administrativo
+
+El panel sólo puede solicitar:
+
+sudo -n /bin/systemctl restart controlhub.service
+
+Sudoers:
+
+stark ALL=(root) NOPASSWD: /bin/systemctl restart controlhub.service
+
+No se debe autorizar systemctl genérico ni comandos adicionales.
 
 ## Desarrollo local
 
-La configuración concreta del entorno de desarrollo se documentará una vez definido el stack tecnológico.
+Backend:
 
-## Producción
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/ruff check .
+.venv/bin/pytest -q
 
-Las instrucciones de despliegue se documentarán cuando la arquitectura de producción esté definida.
+Frontend:
 
-No se deben introducir en el repositorio:
+cd frontend
+npm install
+npm run lint
+npm run test
+npm run build
 
-- contraseñas;
-- API keys;
-- tokens;
-- claves privadas;
-- certificados privados;
-- credenciales de bases de datos;
-- dumps de producción;
-- configuraciones con secretos reales.
+El lockfile generado localmente no se versiona actualmente.
+
+## Secretos
+
+Los valores secretos se cifran con Fernet. Resource no almacena secretos.
+
+La API de secretos sólo devuelve metadatos; nunca devuelve el valor ni el ciphertext. Las operaciones de escritura requieren sesión administrativa y CSRF.
+
+## Despliegue
+
+1. Actualizar el código con Git.
+2. Instalar dependencias si han cambiado.
+3. Ejecutar Ruff y pytest.
+4. Ejecutar lint, tests y build del frontend.
+5. Verificar migraciones Alembic.
+6. Configurar secretos fuera del repositorio.
+7. Reiniciar controlhub.service.
+8. Verificar health local y HTTPS.
+9. Verificar login y flujos administrativos.
+10. Revisar Git y documentación.
+
+No se utiliza file watcher en producción.
