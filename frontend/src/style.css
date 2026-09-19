@@ -884,3 +884,375 @@ textarea {
   .inline-actions { width: 100%; }
   .inline-actions button { flex: 1; }
 }
+
+
+/* Portal directorio: la portada prioriza los accesos visuales. */
+.portal-app {
+  padding-top: 22px;
+}
+
+.portal-topbar {
+  margin-bottom: 28px;
+}
+
+.portal-topbar h1 {
+  font-size: 1.35rem;
+}
+
+.admin-access {
+  width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border-radius: 10px;
+  background: #edf1f6;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.admin-access:hover {
+  color: var(--primary);
+}
+
+.portal-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.portal-intro h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.portal-intro p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.directory-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 150px 140px 42px;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.directory-search {
+  min-height: 38px;
+}
+
+.directory-toolbar select {
+  min-height: 38px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: .8rem;
+}
+
+.directory-favorite {
+  width: 42px;
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: #7b8794;
+  cursor: pointer;
+}
+
+.directory-favorite input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.directory-favorite:has(input:checked) {
+  background: #fff8df;
+  color: #a16b00;
+  border-color: #ead79a;
+}
+
+.directory {
+  display: grid;
+  gap: 30px;
+}
+
+.directory-section {
+  min-width: 0;
+}
+
+.directory-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+.directory-heading h2 {
+  margin: 0;
+  font-size: .92rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.directory-heading span {
+  min-width: 22px;
+  min-height: 22px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e9edf3;
+  color: var(--muted);
+  font-size: .67rem;
+  font-weight: 800;
+}
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 10px;
+}
+
+.directory-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.directory-card:hover {
+  transform: translateY(-2px);
+  border-color: #c8d2df;
+  box-shadow: 0 12px 28px rgb(15 23 42 / 9%);
+}
+
+.directory-link {
+  min-height: 146px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 18px 12px 13px;
+  border-radius: 15px;
+  background: transparent;
+  color: var(--text);
+  text-align: center;
+}
+
+.directory-link:hover {
+  background: #fbfcfe;
+  transform: none;
+  box-shadow: none;
+}
+
+.directory-link-static {
+  cursor: default;
+}
+
+.directory-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 11px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.directory-name {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .86rem;
+  font-weight: 750;
+}
+
+.directory-description {
+  width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .68rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.directory-meta {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.directory-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: #687482;
+  font-size: .61rem;
+  font-weight: 750;
+}
+
+.directory-status.online {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.directory-status.offline {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.directory-status.warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.directory-status .status-dot {
+  width: 5px;
+  height: 5px;
+}
+
+.directory-star {
+  color: #b27a00;
+  font-size: .78rem;
+}
+
+.directory-host {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .62rem;
+}
+
+.directory-admin-actions {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.directory-card:hover .directory-admin-actions,
+.directory-card:focus-within .directory-admin-actions {
+  opacity: 1;
+}
+
+.directory-admin-actions button {
+  min-height: 27px;
+  padding: 0 7px;
+  border-radius: 7px;
+  background: rgb(255 255 255 / 94%);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  box-shadow: 0 3px 10px rgb(15 23 42 / 8%);
+  font-size: .62rem;
+}
+
+.directory-admin-actions button.danger {
+  background: rgb(255 240 240 / 96%);
+  color: var(--danger);
+}
+
+.directory-empty {
+  padding: 55px 20px;
+}
+
+@media (max-width: 760px) {
+  .portal-app {
+    padding: 14px;
+  }
+
+  .portal-topbar {
+    margin-bottom: 22px;
+  }
+
+  .portal-topbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .directory-toolbar {
+    grid-template-columns: 1fr 1fr 42px;
+  }
+
+  .directory-search {
+    grid-column: 1 / -1;
+  }
+
+  .directory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .directory-link {
+    min-height: 125px;
+    padding: 12px 7px 9px;
+  }
+
+  .directory-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    border-radius: 13px;
+    font-size: 1.35rem;
+  }
+
+  .directory-name {
+    font-size: .74rem;
+  }
+
+  .directory-description {
+    display: none;
+  }
+
+  .directory-status {
+    font-size: .57rem;
+  }
+
+  .directory-admin-actions {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 430px) {
+  .directory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .directory-link {
+    min-height: 115px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .directory-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+
+  .directory-name {
+    font-size: .68rem;
+  }
+}
